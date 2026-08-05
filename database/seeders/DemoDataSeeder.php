@@ -22,9 +22,9 @@ class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
-        $japan = Country::query()->create(['name' => 'Yaponiya', 'code' => 'JP']);
-        $germany = Country::query()->create(['name' => 'Germaniya', 'code' => 'DE']);
-        $uzbekistan = Country::query()->create(['name' => 'O\'zbekiston', 'code' => 'UZ']);
+        $japan = Country::query()->firstOrCreate(['code' => 'JP'], ['name' => 'Yaponiya']);
+        $germany = Country::query()->firstOrCreate(['code' => 'DE'], ['name' => 'Germaniya']);
+        $uzbekistan = Country::query()->firstOrCreate(['code' => 'UZ'], ['name' => 'O\'zbekiston']);
 
         $tashkent = City::query()->create(['country_id' => $uzbekistan->id, 'name' => 'Toshkent', 'lat' => 41.311081, 'lng' => 69.240562]);
 
