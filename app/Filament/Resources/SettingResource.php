@@ -1,0 +1,79 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\SettingResource\Pages;
+use App\Models\Setting;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+
+class SettingResource extends Resource
+{
+    protected static ?string $model = Setting::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-cog-8-tooth';
+
+    protected static ?string $navigationGroup = 'Tizim';
+
+    protected static ?string $navigationLabel = 'Sozlamalar';
+
+    protected static ?string $modelLabel = 'sozlama';
+
+    protected static ?string $pluralModelLabel = 'sozlamalar';
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\TextInput::make('key')
+                    ->label('Kalit')
+                    ->required()
+                    ->unique(ignoreRecord: true),
+                Forms\Components\Textarea::make('value')
+                    ->label('Qiymat (JSON)')
+                    ->required()
+                    ->helperText('Matn, raqam yoki JSON obyekt sifatida kiriting. Masalan: "true", "100" yoki {"a":1}')
+                    ->columnSpanFull(),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('key')
+                    ->label('Kalit')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('value')
+                    ->label('Qiymat')
+                    ->formatStateUsing(fn ($state) => is_string($state) ? $state : json_encode($state))
+                    ->limit(80),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Yangilangan')
+                    ->dateTime()
+                    ->sortable(),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ManageSettings::route('/'),
+        ];
+    }
+}

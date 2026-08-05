@@ -1,0 +1,11 @@
+{
+    "name": "Motorcycle",
+    "alias": "motorcycle",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Motorcycle\\Providers\\MotorcycleServiceProvider"
+    ],
+    "files": []
+}

@@ -1,0 +1,11 @@
+{
+    "name": "Comparison",
+    "alias": "comparison",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Comparison\\Providers\\ComparisonServiceProvider"
+    ],
+    "files": []
+}

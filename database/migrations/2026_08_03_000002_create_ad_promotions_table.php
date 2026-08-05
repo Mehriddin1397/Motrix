@@ -1,0 +1,39 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('ad_promotions', function (Blueprint $table) {
+            $table->id();
+            $table->morphs('promotable');
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->enum('tier', ['standard', 'premium', 'top', 'vip'])->default('standard');
+            $table->enum('status', ['pending_payment', 'active', 'expired', 'cancelled'])->default('pending_payment');
+            $table->decimal('price', 12, 2)->default(0);
+            $table->enum('currency', ['USD', 'UZS'])->default('USD');
+            $table->timestamp('starts_at')->nullable();
+            $table->timestamp('ends_at')->nullable();
+            $table->string('payment_reference')->nullable();
+            $table->timestamps();
+
+            $table->index(['promotable_type', 'promotable_id', 'status']);
+            $table->index(['status', 'ends_at']);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('ad_promotions');
+    }
+};

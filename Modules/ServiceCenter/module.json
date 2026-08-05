@@ -1,0 +1,11 @@
+{
+    "name": "ServiceCenter",
+    "alias": "servicecenter",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ServiceCenter\\Providers\\ServiceCenterServiceProvider"
+    ],
+    "files": []
+}

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/xampp/mysql/bin/**)",
+      "Bash(net start *)",
+      "Bash(git --version)",
+      "Read(//c/Users/user/Desktop/projects/**)",
+      "Bash(composer create-project *)"
+    ]
+  }
+}
