@@ -27,6 +27,7 @@ use App\Policies\UserPolicy;
 use App\Policies\VideoCategoryPolicy;
 use App\Policies\VideoPolicy;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Modules\Brand\Models\Brand;
 use Modules\Community\Models\Comment;
@@ -92,6 +93,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Kerio terminates TLS at the network edge and forwards plain HTTP to
+        // this app, so Laravel never sees an https request directly. Force
+        // the scheme here so generated asset/route URLs match the public
+        // https:// address instead of triggering mixed-content blocks.
+        if (str_starts_with(config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
+
         foreach ($this->policies as $model => $policy) {
             Gate::policy($model, $policy);
         }
