@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ListingResource\Pages;
 use App\Filament\Resources\ListingResource\RelationManagers;
+use App\Models\City;
+use App\Models\Country;
 use Modules\Market\Models\Listing;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -77,7 +79,18 @@ class ListingResource extends Resource
                     ->relationship('city', 'name')
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->required()
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Nomi')
+                            ->required(),
+                    ])
+                    ->createOptionUsing(function (array $data): int {
+                        $data['country_id'] = Country::where('code', 'UZ')->value('id');
+
+                        return City::create($data)->getKey();
+                    })
+                    ->createOptionModalHeading('Yangi shahar qo\'shish'),
                 Forms\Components\Textarea::make('description')
                     ->label('Tavsif')
                     ->required()
