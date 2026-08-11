@@ -145,6 +145,12 @@
             </section>
         @endif
 
+        {{-- Telegram community --}}
+        <section class="px-4">
+            <h2 class="mb-3 text-base font-bold">Bizga qo'shiling</h2>
+            <x-telegram-links />
+        </section>
+
     </div>
 
     {{-- Floating AI button --}}

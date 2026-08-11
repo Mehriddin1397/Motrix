@@ -57,6 +57,12 @@
             @endif
         </div>
 
+        {{-- Telegram community --}}
+        <div class="rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <h2 class="mb-3 text-sm font-bold">Ijtimoiy tarmoqlar</h2>
+            <x-telegram-links />
+        </div>
+
         {{-- Moto-seller: e'lonlar --}}
         @if($user->isMotoSeller())
             <div class="rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">

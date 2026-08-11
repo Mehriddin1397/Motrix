@@ -1,8 +1,4 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Modules\Community\Http\Controllers\CommunityController;
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('communities', CommunityController::class)->names('community');
-});
+// The community/groups feature is not exposed on the site — see the
+// Telegram channel/group links on the home page and profile instead.
