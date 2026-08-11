@@ -1,6 +1,12 @@
 <x-layout :title="$video->title">
-    <div class="flex aspect-video w-full items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-950 text-4xl text-white/70">
-        ▶
+    <div class="aspect-video w-full bg-black">
+        @if($video->is_direct_video)
+            <video src="{{ $video->embed_url }}" controls class="h-full w-full"></video>
+        @elseif($video->embed_url)
+            <iframe src="{{ $video->embed_url }}" class="h-full w-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        @else
+            <div class="flex h-full w-full items-center justify-center text-4xl text-white/70">▶</div>
+        @endif
     </div>
 
     <div class="space-y-3 px-4 py-5">

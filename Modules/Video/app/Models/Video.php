@@ -39,6 +39,26 @@ class Video extends Model
             ->saveSlugsTo('slug');
     }
 
+    public function getEmbedUrlAttribute(): ?string
+    {
+        $url = $this->url_or_path;
+
+        if (! $url) {
+            return null;
+        }
+
+        if (preg_match('#(?:youtube\.com/(?:watch\?v=|embed/|shorts/)|youtu\.be/)([\w-]{11})#i', $url, $matches)) {
+            return 'https://www.youtube.com/embed/'.$matches[1];
+        }
+
+        return $url;
+    }
+
+    public function getIsDirectVideoAttribute(): bool
+    {
+        return (bool) preg_match('/\.(mp4|webm|ogg)$/i', parse_url($this->url_or_path, PHP_URL_PATH) ?? '');
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(VideoCategory::class, 'category_id');
