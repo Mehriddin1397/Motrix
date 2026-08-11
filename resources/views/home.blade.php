@@ -130,7 +130,11 @@
                 <div class="space-y-3 px-4">
                     @foreach($news as $article)
                         <a href="{{ route('news.show', $article) }}" class="flex gap-3 rounded-2xl border border-zinc-100 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                            <div class="flex h-14 w-16 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-100 to-zinc-100 text-lg dark:from-zinc-800 dark:to-zinc-950">📰</div>
+                            @if($article->getFirstMediaUrl('cover'))
+                                <img src="{{ $article->getFirstMediaUrl('cover') }}" alt="{{ $article->title }}" class="h-14 w-16 shrink-0 rounded-xl object-cover">
+                            @else
+                                <div class="flex h-14 w-16 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-100 to-zinc-100 text-lg dark:from-zinc-800 dark:to-zinc-950">📰</div>
+                            @endif
                             <div class="flex-1">
                                 <div class="truncate text-sm font-semibold">{{ $article->title }}</div>
                                 <div class="text-xs text-zinc-400">{{ $article->published_at?->format('d.m.Y') }}</div>

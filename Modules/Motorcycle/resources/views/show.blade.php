@@ -88,6 +88,24 @@
             </div>
         @endif
 
+        @php
+            $galleryImages = collect([$motorcycle->getFirstMedia('cover')])
+                ->merge($motorcycle->getMedia('gallery'))
+                ->filter();
+        @endphp
+        @if($galleryImages->isNotEmpty())
+            <div>
+                <h2 class="mb-2 text-sm font-semibold text-zinc-500 dark:text-zinc-400">Rasmlar</h2>
+                <div class="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
+                    @foreach($galleryImages as $image)
+                        <a href="{{ $image->getUrl() }}" target="_blank" rel="noopener" class="block aspect-square w-28 shrink-0 overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-900">
+                            <img src="{{ $image->getUrl() }}" alt="{{ $motorcycle->name }}" class="h-full w-full object-cover">
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         @if($motorcycle->engineDetail?->working_principle)
             <div>
                 <h2 class="mb-2 text-sm font-semibold text-zinc-500 dark:text-zinc-400">Dvigatel ishlash prinsipi</h2>
