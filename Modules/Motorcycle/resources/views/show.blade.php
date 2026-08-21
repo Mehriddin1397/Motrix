@@ -101,14 +101,35 @@
                 ->filter();
         @endphp
         @if($galleryImages->isNotEmpty())
-            <div>
+            <div
+                x-data="{ open: false, index: 0, images: @js($galleryImages->map(fn ($image) => $image->getUrl())->values()) }"
+                x-effect="document.body.classList.toggle('overflow-hidden', open)"
+                x-on:keydown.escape.window="open = false"
+            >
                 <h2 class="mb-2 text-sm font-semibold text-zinc-500 dark:text-zinc-400">Rasmlar</h2>
                 <div class="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
-                    @foreach($galleryImages as $image)
-                        <a href="{{ $image->getUrl() }}" target="_blank" rel="noopener" class="block aspect-square w-28 shrink-0 overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-900">
+                    @foreach($galleryImages as $i => $image)
+                        <button type="button" x-on:click="open = true; index = {{ $i }}" class="block aspect-square w-28 shrink-0 overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-900">
                             <img src="{{ $image->getUrl() }}" alt="{{ $motorcycle->name }}" class="h-full w-full object-cover">
-                        </a>
+                        </button>
                     @endforeach
+                </div>
+
+                <div
+                    x-show="open"
+                    x-transition.opacity
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+                    x-on:click.self="open = false"
+                    style="display: none;"
+                >
+                    <button type="button" x-on:click="open = false" class="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-xl text-white" aria-label="Yopish">✕</button>
+
+                    @if($galleryImages->count() > 1)
+                        <button type="button" x-on:click.stop="index = (index - 1 + images.length) % images.length" class="absolute left-2 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-2xl text-white sm:left-4" aria-label="Oldingi">‹</button>
+                        <button type="button" x-on:click.stop="index = (index + 1) % images.length" class="absolute right-2 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-2xl text-white sm:right-4" aria-label="Keyingi">›</button>
+                    @endif
+
+                    <img :src="images[index]" alt="{{ $motorcycle->name }}" class="max-h-full max-w-full rounded-lg object-contain" x-on:click.stop>
                 </div>
             </div>
         @endif
