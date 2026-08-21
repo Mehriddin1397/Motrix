@@ -26,9 +26,6 @@
             @if($motorcycle->specification?->horsepower)
                 <span>{{ $motorcycle->specification->horsepower }} HP</span>
             @endif
-            @if($motorcycle->specification?->price_usd_min)
-                <span class="font-semibold text-amber-600 dark:text-amber-400">${{ number_format($motorcycle->specification->price_usd_min) }}</span>
-            @endif
         </div>
     </div>
 </a>

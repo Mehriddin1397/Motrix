@@ -45,7 +45,7 @@
                             'Bak hajmi' => $motorcycle->specification->fuel_capacity_l ? $motorcycle->specification->fuel_capacity_l.' L' : null,
                             'Sarfi' => $motorcycle->specification->fuel_consumption_l_100km ? $motorcycle->specification->fuel_consumption_l_100km.' L/100km' : null,
                             'Uzatma' => $motorcycle->specification->transmission,
-                            'Narxi' => $motorcycle->specification->price_usd_min ? '$'.number_format($motorcycle->specification->price_usd_min).($motorcycle->specification->price_usd_max ? ' – $'.number_format($motorcycle->specification->price_usd_max) : '') : null,
+                            'Taxminiy narx' => $motorcycle->specification->price_usd_min ? '$'.number_format($motorcycle->specification->price_usd_min).($motorcycle->specification->price_usd_max ? ' – $'.number_format($motorcycle->specification->price_usd_max) : '') : null,
                         ];
                     @endphp
                     @foreach($specs as $label => $value)

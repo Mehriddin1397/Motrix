@@ -4,13 +4,12 @@
         ['label' => 'Mototsikllar', 'route' => 'motorcycle.index', 'icon' => 'moto'],
         ['label' => 'Bozor', 'route' => 'market.index', 'icon' => 'market'],
         ['label' => 'Video', 'route' => 'video.index', 'icon' => 'video'],
-        ['label' => 'Telegram', 'url' => 'https://t.me/Motrixuz', 'icon' => 'telegram'],
         ['label' => 'Profil', 'route' => auth()->check() ? 'profile.edit' : 'login', 'icon' => 'user'],
     ];
 @endphp
 
 <nav class="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-lg border-t border-zinc-100 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95 sm:max-w-2xl lg:max-w-4xl">
-    <div class="grid grid-cols-6">
+    <div class="grid grid-cols-5">
         @foreach($items as $item)
             @php $active = isset($item['route']) && request()->routeIs($item['route']); @endphp
             <a
@@ -31,9 +30,6 @@
                             @break
                         @case('video')
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M10 9.5v5l4.5-2.5-4.5-2.5z" /></svg>
-                            @break
-                        @case('telegram')
-                            <svg class="h-6 w-6" fill="{{ $active ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m21.5 3.5-18.8 7.4c-1.2.5-1.2 1.2-.2 1.5l4.8 1.5 1.8 5.6c.2.6.4.9.9.9.4 0 .6-.2.9-.5l2.2-2.1 4.5 3.3c.8.5 1.4.2 1.6-.7l3-14c.3-1.2-.4-1.7-1.7-1.9zM8.9 13.7l9-5.6c.4-.3.8-.1.5.2l-7.6 6.9-.3 3.3-1.6-4.8z" /></svg>
                             @break
                         @case('user')
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.2" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M5 20c1.2-3.5 4-5.2 7-5.2s5.8 1.7 7 5.2" /></svg>
