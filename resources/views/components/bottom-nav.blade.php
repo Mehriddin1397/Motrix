@@ -9,13 +9,13 @@
 @endphp
 
 <nav class="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-lg border-t border-zinc-100 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95 sm:max-w-2xl lg:max-w-4xl">
-    <div class="grid grid-cols-5">
+    <div class="flex">
         @foreach($items as $item)
             @php $active = isset($item['route']) && request()->routeIs($item['route']); @endphp
             <a
                 href="{{ $item['url'] ?? (Route::has($item['route']) ? route($item['route']) : '#') }}"
                 @if(isset($item['url'])) target="_blank" rel="noopener" @endif
-                class="flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors {{ $active ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300' }}"
+                class="flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors {{ $active ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300' }}"
             >
                 <span class="flex h-6 w-6 items-center justify-center">
                     @switch($item['icon'])
