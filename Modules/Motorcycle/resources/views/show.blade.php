@@ -67,6 +67,13 @@
             </div>
         @endif
 
+        @if($motorcycle->history)
+            <div>
+                <h2 class="mb-2 text-sm font-semibold text-zinc-500 dark:text-zinc-400">Tarixi</h2>
+                <p class="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">{{ $motorcycle->history }}</p>
+            </div>
+        @endif
+
         @if($motorcycle->prosCons->isNotEmpty())
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>

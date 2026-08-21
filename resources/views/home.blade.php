@@ -73,8 +73,13 @@
                 <div class="flex gap-3 overflow-x-auto px-4 pb-1">
                     @foreach($aiVideos as $video)
                         <a href="{{ route('video.show', $video) }}" class="w-40 shrink-0 overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:w-48">
-                            <div class="relative flex aspect-video items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-950 text-xl text-white/70">
-                                ▶
+                            <div class="relative flex aspect-video items-center justify-center overflow-hidden bg-gradient-to-br from-zinc-800 to-zinc-950 text-xl text-white/70">
+                                @if($video->thumbnail_url)
+                                    <img src="{{ $video->thumbnail_url }}" alt="{{ $video->title }}" class="absolute inset-0 h-full w-full object-cover" loading="lazy">
+                                    <span class="relative flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-sm backdrop-blur-sm">▶</span>
+                                @else
+                                    ▶
+                                @endif
                                 <span class="absolute left-2 top-2 rounded-full bg-violet-500/90 px-2 py-0.5 text-[10px] font-semibold text-white">AI</span>
                             </div>
                             <div class="truncate p-2.5 text-xs font-semibold">{{ $video->title }}</div>

@@ -47,16 +47,34 @@ class Video extends Model
             return null;
         }
 
-        if (preg_match('#(?:youtube\.com/(?:watch\?v=|embed/|shorts/)|youtu\.be/)([\w-]{11})#i', $url, $matches)) {
-            return 'https://www.youtube.com/embed/'.$matches[1];
+        if ($id = $this->youtubeId()) {
+            return 'https://www.youtube.com/embed/'.$id;
         }
 
         return $url;
     }
 
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        if ($id = $this->youtubeId()) {
+            return "https://img.youtube.com/vi/{$id}/hqdefault.jpg";
+        }
+
+        return null;
+    }
+
     public function getIsDirectVideoAttribute(): bool
     {
         return (bool) preg_match('/\.(mp4|webm|ogg)$/i', parse_url($this->url_or_path, PHP_URL_PATH) ?? '');
+    }
+
+    protected function youtubeId(): ?string
+    {
+        if (preg_match('#(?:youtube\.com/(?:watch\?v=|embed/|shorts/)|youtu\.be/)([\w-]{11})#i', $this->url_or_path ?? '', $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 
     public function category(): BelongsTo
