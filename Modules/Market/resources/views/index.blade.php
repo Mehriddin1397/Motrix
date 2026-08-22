@@ -1,10 +1,10 @@
 <x-layout title="Bozor">
     <div class="px-4 py-4">
-        <a href="https://t.me/Motrixuz" target="_blank" rel="noopener" class="mb-4 flex items-center gap-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 p-4 text-white">
+        <a href="https://t.me/MehriddinSoyibov" target="_blank" rel="noopener" class="mb-4 flex items-center gap-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 p-4 text-white">
             <span class="text-2xl">🤝</span>
             <div class="flex-1">
                 <div class="text-sm font-bold">Sotuvchimisiz?</div>
-                <div class="text-xs text-amber-100">Mototsiklingizni shu yerda e'lon qilish uchun biz bilan hamkorlik qiling.</div>
+                <div class="text-xs text-amber-100">Mototsiklingizni shu yerda e'lon qilish uchun @MehriddinSoyibov ga yozing.</div>
             </div>
             <span>→</span>
         </a>
