@@ -1,0 +1,103 @@
+/*
+ * Motrix.uz landing page — theme tokens, glassmorphism utilities and
+ * scroll-reveal keyframes that go beyond what Tailwind's default
+ * utility set expresses cleanly. Loaded only on the /landing route.
+ */
+
+:root {
+    --landing-bg: #0a0a0c;
+    --landing-bg-elevated: #101014;
+    --landing-fg: #f5f7fa;
+    --landing-muted: #9aa1ac;
+    --landing-accent: #00f0ff;
+    --landing-accent-2: #0072ff;
+    --landing-border: rgba(255, 255, 255, 0.1);
+}
+
+.landing {
+    background: var(--landing-bg);
+    color: var(--landing-fg);
+}
+
+/* Glassmorphic surface: translucent panel, blurred backdrop, soft border. */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid var(--landing-border);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.glass-panel:hover {
+    border-color: rgba(0, 240, 255, 0.35);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+/* Neon text / icon gradient shared across headings and accents. */
+.neon-gradient-text {
+    background: linear-gradient(90deg, var(--landing-accent), var(--landing-accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.neon-glow {
+    box-shadow: 0 0 0 1px rgba(0, 240, 255, 0.25), 0 0 40px -8px rgba(0, 114, 255, 0.55);
+}
+
+/* Canvas that renders the scrollytelling frame sequence. Sizing (full-bleed
+   on mobile, split-screen on desktop) is controlled by Tailwind width/inset
+   utilities on the element itself — kept out of this rule so those
+   responsive utilities aren't fighting a fixed width/height here. */
+.frame-canvas {
+    position: absolute;
+    object-fit: cover;
+}
+
+/* Elements revealed on scroll via IntersectionObserver (see landing.js). */
+.reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes scroll-cue-bounce {
+    0%, 100% { transform: translateY(0); opacity: 0.6; }
+    50% { transform: translateY(8px); opacity: 1; }
+}
+
+.scroll-cue {
+    animation: scroll-cue-bounce 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.6); opacity: 0.4; }
+}
+
+.pulse-dot::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: currentColor;
+    animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+/* Thin, theme-matching scrollbar for the whole landing document. */
+.landing ::-webkit-scrollbar {
+    width: 10px;
+}
+
+.landing ::-webkit-scrollbar-track {
+    background: var(--landing-bg);
+}
+
+.landing ::-webkit-scrollbar-thumb {
+    background: linear-gradient(var(--landing-accent), var(--landing-accent-2));
+    border-radius: 9999px;
+}

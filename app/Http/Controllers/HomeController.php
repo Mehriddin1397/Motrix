@@ -10,8 +10,17 @@ use Modules\Video\Models\Video;
 
 class HomeController extends Controller
 {
+    /**
+     * Total number of preloaded scrollytelling frames (public/frames/ezgif-frame-001.jpg ... 080.jpg).
+     */
+    private const FRAME_COUNT = 80;
+
     public function __invoke()
     {
+        $frames = collect(range(1, self::FRAME_COUNT))
+            ->map(fn (int $i) => asset(sprintf('frames/ezgif-frame-%03d.jpg', $i)))
+            ->all();
+
         $categories = MotorcycleCategory::query()->orderBy('name')->get();
 
         $popular = Motorcycle::query()
@@ -48,6 +57,6 @@ class HomeController extends Controller
             ->limit(3)
             ->get();
 
-        return view('home', compact('categories', 'popular', 'newest', 'aiVideos', 'listings', 'news'));
+        return view('home', compact('frames', 'categories', 'popular', 'newest', 'aiVideos', 'listings', 'news'));
     }
 }
