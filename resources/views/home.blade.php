@@ -17,7 +17,8 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet">
 
-    @vite(['resources/css/app.css', 'resources/css/landing.css', 'resources/js/landing.js'])
+    {{-- app.js loads Alpine, needed by the mobile bottom tab bar's "Bozor" popover. --}}
+    @vite(['resources/css/app.css', 'resources/css/landing.css', 'resources/js/app.js', 'resources/js/landing.js'])
 </head>
 <body class="landing font-sans antialiased">
 
@@ -36,7 +37,30 @@
             <a href="#media" class="transition hover:text-white">Media</a>
             <span class="h-4 w-px bg-white/15"></span>
             <a href="{{ route('motorcycle.index') }}" class="transition hover:text-white">Mototsikllar</a>
-            <a href="{{ route('market.index') }}" class="transition hover:text-white">Bozor</a>
+
+            {{-- Bozor / Ehtiyot qismlar / Ustaxonalar unified under one dropdown —
+                 pure CSS (group-hover + focus-within), no JS needed. --}}
+            <div class="group relative">
+                <button type="button" class="flex items-center gap-1 transition hover:text-white">
+                    Bozor
+                    <svg class="h-3.5 w-3.5 transition group-hover:rotate-180 group-focus-within:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                </button>
+                <div class="invisible absolute left-1/2 top-full z-10 w-64 -translate-x-1/2 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                    <div class="glass-panel rounded-2xl p-2">
+                        @foreach([
+                            ['label' => 'Mototsikl bozori', 'desc' => 'Sotiladigan mototsikllar', 'route' => 'market.index'],
+                            ['label' => 'Ehtiyot qismlar', 'desc' => 'Moto ehtiyot qismlari va aksessuarlar', 'route' => 'parts.index'],
+                            ['label' => 'Ustaxonalar', 'desc' => "Xizmat ko'rsatish shoxobchalari", 'route' => 'servicecenter.index'],
+                        ] as $item)
+                            <a href="{{ route($item['route']) }}" class="block rounded-xl px-3 py-2 text-left transition hover:bg-white/10">
+                                <div class="text-sm font-semibold text-white">{{ $item['label'] }}</div>
+                                <div class="text-xs text-white/50">{{ $item['desc'] }}</div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
             <a href="{{ route('video.index') }}" class="transition hover:text-white">Video</a>
         </nav>
 
