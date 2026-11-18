@@ -34,7 +34,16 @@
                         @if($sellerShop && $sellerShop->logo_url)
                             <img src="{{ $sellerShop->logo_url }}" alt="{{ $sellerShop->name }}" class="h-full w-full object-cover">
                         @elseif($seller->avatar_url)
-                            <img src="{{ $seller->avatar_url }}" alt="{{ $seller->name }}" class="h-full w-full object-cover">
+                            <img 
+                                src="{{ $seller->avatar_url }}" 
+                                alt="{{ $seller->name }}" 
+                                referrerpolicy="no-referrer"
+                                class="h-full w-full object-cover"
+                                onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';"
+                            >
+                            <span style="display:none;" class="h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600 text-2xl font-black text-white">
+                                {{ mb_strtoupper(mb_substr($sellerShop ? $sellerShop->name : $seller->name, 0, 1)) }}
+                            </span>
                         @else
                             <span class="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600 text-2xl font-black text-white">
                                 {{ mb_strtoupper(mb_substr($sellerShop ? $sellerShop->name : $seller->name, 0, 1)) }}

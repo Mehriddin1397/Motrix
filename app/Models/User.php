@@ -249,17 +249,38 @@ class User extends Authenticatable implements FilamentUser, HasMedia
             return null;
         }
 
+        // Agar nisbiy yo'l bo'lsa (masalan: "avatars/1.jpg" yoki "storage/...")
         if (! str_starts_with($url, 'http://') && ! str_starts_with($url, 'https://')) {
-            return asset('storage/' . ltrim($url, '/'));
+            $trimmed = ltrim($url, '/');
+            if (str_starts_with($trimmed, 'storage/')) {
+                return asset($trimmed);
+            }
+            return asset('storage/' . $trimmed);
         }
 
-        // If it points to localhost / 127.0.0.1 or has mismatched host, extract path and use asset()
-        $parsed = parse_url($url);
-        if (isset($parsed['path'])) {
-            $path = ltrim($parsed['path'], '/');
-            return asset($path);
+        $host = parse_url($url, PHP_URL_HOST);
+        $path = parse_url($url, PHP_URL_PATH) ?: '';
+
+        // Agar URL ichida /storage/ bo'lsa (masalan http://localhost/storage/...)
+        if (str_contains($path, '/storage/')) {
+            $storagePath = substr($path, strpos($path, '/storage/') + 1);
+            return asset($storagePath);
         }
 
-        return $url;
+        // Agar Google yoki boshqa tashqi domen bo'lsa, URL'ni o'zini qaytaramiz
+        $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+        $requestHost = request()?->getHost();
+        $localHosts = array_filter(['localhost', '127.0.0.1', $appHost, $requestHost]);
+
+        if (! in_array($host, $localHosts, true)) {
+            // Google avatar o'lchamini kattaroq (s256-c) qilish
+            if (str_contains($host, 'googleusercontent.com')) {
+                $url = preg_replace('/=s\d+(-c)?$/', '=s256-c', $url);
+            }
+            return $url;
+        }
+
+        // Mahalliy serverdagi boshqa yo'llar
+        return asset(ltrim($path, '/'));
     }
 }

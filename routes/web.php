@@ -35,6 +35,14 @@ Route::get('/sw.js', function () {
 Route::get('/sellers/{user}', [ProfileController::class, 'show'])->name('sellers.show');
 Route::get('/shops/{shop}', [ShopController::class, 'show'])->name('shops.show');
 
+// Vaqtinchalik xodim profili (test sahifalari)
+Route::get('/test-profile', function () {
+    return response()->file(public_path('test/index.php'), ['Content-Type' => 'text/html; charset=UTF-8']);
+});
+Route::get('/test-abdujalilova', function () {
+    return response()->file(public_path('test/abdujalilova.php'), ['Content-Type' => 'text/html; charset=UTF-8']);
+});
+
 // Motrix Quiz routes (Haftalik viktorina tizimi)
 Route::get('/quiz', [QuizController::class, 'index'])->name('quiz.index');
 Route::get('/quiz/{quiz:slug}', [QuizController::class, 'show'])->name('quiz.show');

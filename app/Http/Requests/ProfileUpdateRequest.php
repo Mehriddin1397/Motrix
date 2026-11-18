@@ -30,7 +30,7 @@ class ProfileUpdateRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:20'],
             'telegram' => ['nullable', 'string', 'max:100'],
             'instagram' => ['nullable', 'string', 'max:100'],
-            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
             'remove_avatar' => ['nullable', 'boolean'],
         ];
     }

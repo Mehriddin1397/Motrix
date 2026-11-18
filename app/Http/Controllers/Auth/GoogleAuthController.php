@@ -51,7 +51,7 @@ class GoogleAuthController extends Controller
 
             if ($user) {
                 $user->google_id = $googleUser->getId();
-                if (empty($user->avatar) && ! empty($googleUser->getAvatar())) {
+                if ((empty($user->avatar) || ! $user->hasMedia('avatar')) && ! empty($googleUser->getAvatar())) {
                     $user->avatar = $googleUser->getAvatar();
                 }
                 if (is_null($user->email_verified_at)) {
@@ -83,8 +83,8 @@ class GoogleAuthController extends Controller
                 $user->assignRole('user');
             }
         } else {
-            // Agar avatar yo'q bo'lsa yangilash
-            if (empty($user->avatar) && ! empty($googleUser->getAvatar())) {
+            // Agar media avatar yuklamagan bo'lsa, Google avatari bilan yangilash
+            if ((empty($user->avatar) || ! $user->hasMedia('avatar')) && ! empty($googleUser->getAvatar())) {
                 $user->avatar = $googleUser->getAvatar();
                 $user->save();
             }

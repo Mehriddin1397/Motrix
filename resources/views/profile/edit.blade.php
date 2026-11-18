@@ -17,7 +17,16 @@
                     {{-- Avatar --}}
                     <div class="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl ring-4 ring-amber-500/20 shadow-md bg-zinc-100 dark:bg-zinc-800">
                         @if($user->avatar_url)
-                            <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="h-full w-full object-cover">
+                            <img 
+                                src="{{ $user->avatar_url }}" 
+                                alt="{{ $user->name }}" 
+                                referrerpolicy="no-referrer"
+                                class="h-full w-full object-cover"
+                                onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';"
+                            >
+                            <span style="display:none;" class="h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600 text-2xl font-black text-white">
+                                {{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}
+                            </span>
                         @else
                             <span class="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600 text-2xl font-black text-white">
                                 {{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}

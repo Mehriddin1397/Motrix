@@ -110,9 +110,21 @@
         title="{{ auth()->check() ? auth()->user()->name : 'Tizimga kirish' }}"
     >
         @if(auth()->check() && auth()->user()->avatar_url)
-            <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" class="h-full w-full object-cover">
+            <img 
+                src="{{ auth()->user()->avatar_url }}" 
+                alt="{{ auth()->user()->name }}" 
+                referrerpolicy="no-referrer"
+                loading="lazy"
+                class="h-full w-full object-cover"
+                onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';"
+            >
+            <span style="display:none;" class="h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600 text-xs font-bold text-white">
+                {{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
+            </span>
         @elseif(auth()->check())
-            {{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
+            <span class="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600 text-xs font-bold text-white">
+                {{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
+            </span>
         @else
             <svg class="h-5 w-5 text-zinc-500 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
         @endif

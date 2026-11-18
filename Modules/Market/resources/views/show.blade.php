@@ -253,7 +253,16 @@
                     @else
                         <a href="{{ route('sellers.show', $listing->user) }}" class="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl ring-2 ring-zinc-300 dark:ring-zinc-700 shadow transition hover:scale-105">
                             @if($listing->user->avatar_url)
-                                <img src="{{ $listing->user->avatar_url }}" alt="{{ $listing->user->name }}" class="h-full w-full object-cover">
+                                <img 
+                                    src="{{ $listing->user->avatar_url }}" 
+                                    alt="{{ $listing->user->name }}" 
+                                    referrerpolicy="no-referrer"
+                                    class="h-full w-full object-cover"
+                                    onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';"
+                                >
+                                <span style="display:none;" class="h-full w-full items-center justify-center bg-gradient-to-br from-zinc-400 to-zinc-600 text-lg font-black text-white">
+                                    {{ mb_strtoupper(mb_substr($listing->user->name ?? 'U', 0, 1)) }}
+                                </span>
                             @else
                                 <span class="flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-400 to-zinc-600 text-lg font-black text-white">
                                     {{ mb_strtoupper(mb_substr($listing->user->name ?? 'U', 0, 1)) }}

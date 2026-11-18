@@ -102,7 +102,17 @@
                             @case('user')
                                 @if(auth()->check() && auth()->user()->avatar_url)
                                     <span class="relative flex h-6 w-6 shrink-0 overflow-hidden rounded-full ring-1.5 {{ $active ? 'ring-amber-500' : 'ring-zinc-400' }}">
-                                        <img src="{{ auth()->user()->avatar_url }}" alt="" class="h-full w-full object-cover">
+                                        <img 
+                                            src="{{ auth()->user()->avatar_url }}" 
+                                            alt="" 
+                                            referrerpolicy="no-referrer"
+                                            loading="lazy"
+                                            class="h-full w-full object-cover"
+                                            onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';"
+                                        >
+                                        <span style="display:none;" class="h-full w-full items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600 text-[10px] font-bold text-white">
+                                            {{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
+                                        </span>
                                     </span>
                                 @else
                                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.2" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M5 20c1.2-3.5 4-5.2 7-5.2s5.8 1.7 7 5.2" /></svg>

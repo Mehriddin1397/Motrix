@@ -168,17 +168,67 @@ function imagePreviewManager() {
     return {
         dragOver: false,
         newFiles: [],
-        handleFiles(fileList) {
+        isProcessing: false,
+        async handleFiles(fileList) {
             const files = Array.from(fileList);
-            files.forEach(file => {
+            this.isProcessing = true;
+            for (const file of files) {
                 if (file.type && file.type.startsWith('image/')) {
+                    const compressed = await this.compress(file, 1600, 1600, 0.82);
                     this.newFiles.push({
-                        file: file,
-                        url: URL.createObjectURL(file)
+                        file: compressed,
+                        url: URL.createObjectURL(compressed)
                     });
                 }
-            });
+            }
+            this.isProcessing = false;
             this.syncInput();
+        },
+        compress(file, maxWidth, maxHeight, quality) {
+            return new Promise((resolve) => {
+                if (file.size <= 200 * 1024) {
+                    resolve(file);
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > maxWidth || height > maxHeight) {
+                            if (width > height) {
+                                height = Math.round((height * maxWidth) / width);
+                                width = maxWidth;
+                            } else {
+                                width = Math.round((width * maxHeight) / height);
+                                height = maxHeight;
+                            }
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        canvas.toBlob((blob) => {
+                            if (!blob) {
+                                resolve(file);
+                                return;
+                            }
+                            const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + '.jpg', {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+                            resolve(newFile);
+                        }, 'image/jpeg', quality);
+                    };
+                    img.onerror = () => resolve(file);
+                    img.src = e.target.result;
+                };
+                reader.onerror = () => resolve(file);
+                reader.readAsDataURL(file);
+            });
         },
         handleDrop(e) {
             this.dragOver = false;
