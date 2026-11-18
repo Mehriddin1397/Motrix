@@ -2,18 +2,26 @@
     $isSeller = $conversation->seller_id === auth()->id();
     $other = $isSeller ? $conversation->buyer : $conversation->seller;
 @endphp
-<x-layout :title="$other?->name ?? 'Suhbat'">
+<x-layout :title="$other?->name ?? 'Suhbat'" :noindex="true">
     <div class="flex flex-col gap-4 px-4 py-4">
         <a href="{{ route('market.conversations.index') }}" class="text-sm font-medium text-amber-600 dark:text-amber-400">← Barcha xabarlar</a>
 
         @if($conversation->listing)
             <a href="{{ route('market.show', $conversation->listing) }}" class="flex items-center gap-3 rounded-2xl border border-zinc-100 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-100 to-zinc-100 text-sm font-black text-amber-300 dark:from-zinc-800 dark:to-zinc-950 dark:text-zinc-700">
-                    {{ mb_substr($conversation->listing->motorcycle->brand->name ?? 'M', 0, 1) }}
-                </span>
+                <div class="relative flex h-11 w-13 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-amber-100 to-zinc-100 dark:from-zinc-800 dark:to-zinc-950">
+                    @if($conversation->listing->hasMedia('images'))
+                        <img src="{{ $conversation->listing->getFirstMediaUrl('images') }}" alt="" class="h-full w-full object-cover">
+                    @else
+                        <span class="text-sm font-black text-amber-300 dark:text-zinc-700">
+                            {{ mb_substr($conversation->listing->motorcycle->brand->name ?? 'M', 0, 1) }}
+                        </span>
+                    @endif
+                </div>
                 <div class="min-w-0 flex-1">
                     <div class="truncate text-sm font-semibold">{{ $conversation->listing->motorcycle->name ?? $conversation->listing->custom_title }}</div>
-                    <div class="text-xs font-bold text-amber-600 dark:text-amber-400">${{ number_format($conversation->listing->price) }}</div>
+                    <div class="text-xs font-bold text-amber-600 dark:text-amber-400">
+                        {{ $conversation->listing->currency === 'USD' ? '$' : '' }}{{ number_format($conversation->listing->price) }}{{ $conversation->listing->currency === 'UZS' ? ' so\'m' : '' }}
+                    </div>
                 </div>
             </a>
         @endif
@@ -22,9 +30,15 @@
             @foreach($conversation->messages as $message)
                 @php $isMine = $message->sender_id === auth()->id(); @endphp
                 <div class="flex items-end gap-2 {{ $isMine ? 'flex-row-reverse' : '' }}">
-                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-xs font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
-                        {{ mb_strtoupper(mb_substr($message->sender->name ?? '?', 0, 1)) }}
-                    </span>
+                    <div class="relative h-7 w-7 shrink-0 overflow-hidden rounded-full ring-1 ring-zinc-200 dark:ring-zinc-700">
+                        @if($message->sender?->avatar_url)
+                            <img src="{{ $message->sender->avatar_url }}" alt="{{ $message->sender->name }}" class="h-full w-full object-cover">
+                        @else
+                            <span class="flex h-full w-full items-center justify-center bg-zinc-200 text-xs font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                                {{ mb_strtoupper(mb_substr($message->sender->name ?? '?', 0, 1)) }}
+                            </span>
+                        @endif
+                    </div>
                     <div class="max-w-[75%] rounded-2xl px-3.5 py-2.5 text-sm {{ $isMine ? 'rounded-br-sm bg-amber-500 text-zinc-900' : 'rounded-bl-sm bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200' }}">
                         {{ $message->body }}
                         <div class="mt-1 text-[10px] {{ $isMine ? 'text-zinc-900/60' : 'text-zinc-400' }}">{{ $message->created_at->format('d.m.Y H:i') }}</div>

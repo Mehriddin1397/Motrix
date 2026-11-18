@@ -70,4 +70,44 @@ class ServiceProvider extends Model implements HasMedia
     {
         return $this->hasMany(ServiceReview::class);
     }
+
+    public function hasCoordinates(): bool
+    {
+        return filled($this->lat) && filled($this->lng) && $this->lat != 0 && $this->lng != 0;
+    }
+
+    public function getYandexNaviUrl(): string
+    {
+        if ($this->hasCoordinates()) {
+            return "https://yandex.uz/maps/?rtext=~{$this->lat},{$this->lng}&rtt=auto";
+        }
+        $query = urlencode(($this->address ?: '') . ' ' . ($this->city?->name ?: 'Uzbekistan'));
+        return "https://yandex.uz/maps/?text={$query}";
+    }
+
+    public function getGoogleMapsUrl(): string
+    {
+        if ($this->hasCoordinates()) {
+            return "https://www.google.com/maps/dir/?api=1&destination={$this->lat},{$this->lng}";
+        }
+        $query = urlencode(($this->address ?: '') . ' ' . ($this->city?->name ?: 'Uzbekistan'));
+        return "https://www.google.com/maps/search/?api=1&query={$query}";
+    }
+
+    public function getAppleMapsUrl(): string
+    {
+        if ($this->hasCoordinates()) {
+            return "https://maps.apple.com/?daddr={$this->lat},{$this->lng}&dirflg=d";
+        }
+        $query = urlencode(($this->address ?: '') . ' ' . ($this->city?->name ?: 'Uzbekistan'));
+        return "https://maps.apple.com/?q={$query}";
+    }
+
+    public function getTwoGisUrl(): string
+    {
+        if ($this->hasCoordinates()) {
+            return "https://2gis.uz/routeSearch/rsType/car/to/{$this->lng},{$this->lat}";
+        }
+        return "https://2gis.uz";
+    }
 }

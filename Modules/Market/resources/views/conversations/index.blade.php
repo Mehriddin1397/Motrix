@@ -1,4 +1,4 @@
-<x-layout title="Xabarlar">
+<x-layout title="Xabarlar" :noindex="true">
     <div class="px-4 py-4">
         @if($conversations->isEmpty())
             <div class="rounded-2xl border border-dashed border-zinc-200 p-8 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">

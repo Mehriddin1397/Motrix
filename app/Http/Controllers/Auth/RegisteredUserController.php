@@ -42,10 +42,13 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        $user->assignRole('user');
+
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->intended(route('home', absolute: false))
+            ->with('status', "Xush kelibsiz! Endi siz o'z mototsiklingizni sotuvga qo'yishingiz mumkin.");
     }
 }

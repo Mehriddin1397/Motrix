@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Quiz;
+use Modules\Brand\Models\Brand;
 use Modules\Market\Models\Listing;
 use Modules\Motorcycle\Models\Motorcycle;
 use Modules\Motorcycle\Models\MotorcycleCategory;
@@ -21,7 +23,17 @@ class HomeController extends Controller
             ->map(fn (int $i) => asset(sprintf('frames/ezgif-frame-%03d.jpg', $i)))
             ->all();
 
-        $categories = MotorcycleCategory::query()->orderBy('name')->get();
+        $categories = MotorcycleCategory::query()
+            ->withCount(['motorcycles' => fn ($q) => $q->where('status', 'published')])
+            ->orderBy('name')
+            ->get();
+
+        $popularBrands = Brand::query()
+            ->has('motorcycles')
+            ->withCount(['motorcycles' => fn ($q) => $q->where('status', 'published')])
+            ->orderByDesc('motorcycles_count')
+            ->limit(8)
+            ->get();
 
         $popular = Motorcycle::query()
             ->with(['brand', 'specification'])
@@ -33,30 +45,46 @@ class HomeController extends Controller
         $newest = Motorcycle::query()
             ->with(['brand', 'specification'])
             ->where('status', 'published')
-            ->latest()
+            ->latest('id')
             ->limit(8)
             ->get();
 
-        $aiVideos = Video::query()
-            ->with('motorcycle.brand')
-            ->where('is_ai_generated', true)
+        $activeQuiz = Quiz::query()
+            ->withCount('questions')
+            ->where('is_active', true)
+            ->latest('id')
+            ->first();
+
+        $featuredVideos = Video::query()
+            ->with(['category', 'motorcycle.brand'])
             ->latest('published_at')
             ->limit(6)
             ->get();
 
+        $knowledgeArticles = News::query()
+            ->with(['category', 'media'])
+            ->where('status', 'published')
+            ->latest('published_at')
+            ->limit(4)
+            ->get();
+
         $listings = Listing::query()
-            ->with(['motorcycle.brand', 'city'])
+            ->with(['motorcycle.brand', 'city', 'media'])
             ->where('status', 'active')
             ->latest('published_at')
             ->limit(6)
             ->get();
 
-        $news = News::query()
-            ->where('status', 'published')
-            ->latest('published_at')
-            ->limit(3)
-            ->get();
-
-        return view('home', compact('frames', 'categories', 'popular', 'newest', 'aiVideos', 'listings', 'news'));
+        return view('home', compact(
+            'frames',
+            'categories',
+            'popularBrands',
+            'popular',
+            'newest',
+            'activeQuiz',
+            'featuredVideos',
+            'knowledgeArticles',
+            'listings'
+        ));
     }
 }

@@ -34,6 +34,7 @@ class ServiceCenterController extends Controller
 
     public function show(ServiceProvider $service)
     {
+        $service->incrementQuietly('views_count');
         $service->load(['category', 'city', 'brands', 'reviews.user']);
 
         return view('servicecenter::show', ['provider' => $service]);

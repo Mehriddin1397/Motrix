@@ -14,10 +14,17 @@ class MarketController extends Controller
     public function index(Request $request)
     {
         $listings = Listing::query()
-            ->with(['motorcycle.brand', 'brand', 'city'])
+            ->with(['motorcycle.brand', 'brand', 'city', 'shop', 'user.shops', 'media'])
             ->where('status', 'active')
             ->when($request->motorcycle, fn ($query, $slug) => $query->whereHas('motorcycle', fn ($m) => $m->where('slug', $slug)))
             ->when($request->city, fn ($query, $city) => $query->whereHas('city', fn ($c) => $c->where('id', $city)))
+            ->when($request->seller_type === 'shop', fn ($query) => $query->where(fn ($sub) => 
+                $sub->whereNotNull('shop_id')
+                    ->orWhereHas('user.shops', fn ($s) => $s->whereIn('type', ['moto', 'both'])->where('is_active', true))
+            ))
+            ->when($request->seller_type === 'individual', fn ($query) => $query->whereNull('shop_id')->whereDoesntHave('user.shops', fn ($s) => 
+                $s->whereIn('type', ['moto', 'both'])->where('is_active', true)
+            ))
             ->latest('published_at')
             ->paginate(12)
             ->withQueryString();
@@ -40,6 +47,10 @@ class MarketController extends Controller
 
         $listing = new Listing($data);
         $listing->user_id = $request->user()->id;
+        // Automatically link to user's moto shop if they have one
+        if ($request->user()->motoShop) {
+            $listing->shop_id = $request->user()->motoShop->id;
+        }
         $listing->status = Listing::determineInitialStatus($request->user());
         $listing->published_at = $listing->status === 'active' ? now() : null;
         $listing->save();
@@ -55,9 +66,47 @@ class MarketController extends Controller
 
     public function show(Listing $market)
     {
-        $market->load(['motorcycle.brand', 'brand', 'city', 'user']);
+        $market->incrementQuietly('views_count');
+        $market->load(['motorcycle.brand', 'brand', 'city', 'user.city', 'user.trustProfile', 'user.shops', 'shop.city', 'media']);
 
-        return view('market::show', ['listing' => $market]);
+        $similarListings = Listing::query()
+            ->where('id', '!=', $market->id)
+            ->where('status', 'active')
+            ->where(function ($query) use ($market) {
+                if ($market->brand_id) {
+                    $query->where('brand_id', $market->brand_id);
+                }
+                if ($market->motorcycle_id) {
+                    $query->orWhere('motorcycle_id', $market->motorcycle_id);
+                }
+            })
+            ->with(['motorcycle.brand', 'brand', 'city', 'media'])
+            ->latest('published_at')
+            ->limit(4)
+            ->get();
+
+        if ($similarListings->count() < 4) {
+            $excludeIds = $similarListings->pluck('id')->push($market->id);
+            $extra = Listing::query()
+                ->whereNotIn('id', $excludeIds)
+                ->where('status', 'active')
+                ->with(['motorcycle.brand', 'brand', 'city', 'media'])
+                ->latest('published_at')
+                ->limit(4 - $similarListings->count())
+                ->get();
+            $similarListings = $similarListings->concat($extra);
+        }
+
+        $sellerOtherCount = Listing::where('user_id', $market->user_id)
+            ->where('status', 'active')
+            ->where('id', '!=', $market->id)
+            ->count();
+
+        return view('market::show', [
+            'listing' => $market,
+            'similarListings' => $similarListings,
+            'sellerOtherCount' => $sellerOtherCount,
+        ]);
     }
 
     public function edit(Listing $market)

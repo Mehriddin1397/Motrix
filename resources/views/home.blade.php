@@ -4,12 +4,78 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#0a0a0c">
-    <meta name="description" content="Motrix.uz — mototsikl ixlosmandlari uchun yagona ekotizim: katalog, bozor, ehtiyot qismlar, ustaxonalar va yangiliklar bitta platformada.">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Motrix.uz — Mototsikl ekotizimi</title>
+    <title>Motrix — O'zbekistonda mototsikllar bozori va e'lonlar platformasi | Moto bozor Toshkent</title>
+    <meta name="description" content="Motrix.uz — O'zbekistonda mototsikl sotib olish va sotish bo'yicha №1 platforma: yangi va minilgan mototsikllar bozori, e'lonlar, ehtiyot qismlar, ustaxonalar va katalog.">
+    <meta name="keywords" content="mototsikl narxlari, moto bozor toshkent, mototsikl sotib olish, mototsikl sotish, moto elonlar, skuter narxlari, moped, motrix, uzbekistan moto, moto ehtiyot qismlar, moto ustaxona">
+    <meta name="author" content="Motrix.uz">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+
+    <link rel="canonical" href="https://motrix.uz">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Motrix.uz">
+    <meta property="og:url" content="https://motrix.uz">
+    <meta property="og:title" content="Motrix — O'zbekistonda mototsikllar bozori va e'lonlar platformasi">
+    <meta property="og:description" content="Motrix.uz — O'zbekistonda mototsikl sotib olish va sotish bo'yicha №1 ekotizim: yangi va minilgan mototsikllar, e'lonlar, ehtiyot qismlar va servislar.">
+    <meta property="og:image" content="https://motrix.uz/images/logo-full-white.png">
+    <meta property="og:locale" content="uz_UZ">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://motrix.uz">
+    <meta name="twitter:title" content="Motrix — O'zbekistonda mototsikllar bozori va e'lonlar platformasi">
+    <meta name="twitter:description" content="Motrix.uz — O'zbekistonda mototsikl sotib olish va sotish bo'yicha №1 ekotizim: yangi va minilgan mototsikllar, e'lonlar, ehtiyot qismlar va servislar.">
+    <meta name="twitter:image" content="https://motrix.uz/images/logo-full-white.png">
+
+    @if(config('services.google.site_verification'))
+    <meta name="google-site-verification" content="{{ config('services.google.site_verification') }}">
+    @endif
+
+    {{-- Structured Data (JSON-LD) --}}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://motrix.uz/#organization",
+          "name": "Motrix",
+          "url": "https://motrix.uz",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://motrix.uz/images/logo-icon-black.png"
+          },
+          "description": "O'zbekistonda mototsikllar bozori, e'lonlar va mototsikl ixlosmandlari ekotizimi."
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://motrix.uz/#website",
+          "url": "https://motrix.uz",
+          "name": "Motrix",
+          "publisher": {
+            "@id": "https://motrix.uz/#organization"
+          },
+          "inLanguage": "uz-UZ",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://motrix.uz/market?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+    </script>
 
     <link rel="icon" type="image/png" href="{{ asset('images/logo-icon-white.png') }}">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Motrix">
+    <link rel="apple-touch-icon" href="{{ asset('images/icon-192.png') }}">
 
     {{-- Warm up the first scrollytelling frame so it paints as early as possible. --}}
     <link rel="preload" as="image" href="{{ $frames[0] }}" fetchpriority="high">
@@ -20,10 +86,13 @@
     {{-- app.js loads Alpine, needed by the mobile bottom tab bar's "Bozor" popover. --}}
     @vite(['resources/css/app.css', 'resources/css/landing.css', 'resources/js/app.js', 'resources/js/landing.js'])
 </head>
-<body class="landing font-sans antialiased">
+<body class="landing font-sans antialiased" x-data="{ bannerOpen: localStorage.getItem('motrix_test_mode_notice_closed') !== '1' }" @test-banner-closed.window="bannerOpen = false">
+
+    {{-- Test Mode Banner --}}
+    <x-test-mode-banner :fixed="true" />
 
     {{-- ============================== TOP NAV ============================== --}}
-    <header class="fixed inset-x-0 top-0 z-40 flex items-center justify-between gap-4 px-5 py-4 sm:px-10">
+    <header class="fixed inset-x-0 z-40 flex items-center justify-between gap-4 px-5 py-4 sm:px-10 transition-all duration-200" :class="bannerOpen ? 'top-9 sm:top-10' : 'top-0'">
         <a href="{{ route('home') }}" class="flex items-center gap-2">
             <img src="{{ asset('images/logo-full-white.png') }}" alt="Motrix.uz" class="h-6 w-auto sm:h-7">
         </a>
@@ -31,15 +100,16 @@
         {{-- On phone-sized screens this row is hidden entirely — the same
              destinations are reachable from the bottom tab bar instead. --}}
         <nav class="hidden items-center gap-6 text-sm font-medium text-white/70 md:flex">
-            <a href="#loyiha-haqida" class="transition hover:text-white">Loyiha haqida</a>
-            <a href="#ekosistema" class="transition hover:text-white">Ekotizim</a>
-            <a href="#hamjamiyat" class="transition hover:text-white">Hamjamiyat</a>
-            <a href="#media" class="transition hover:text-white">Media</a>
-            <span class="h-4 w-px bg-white/15"></span>
-            <a href="{{ route('motorcycle.index') }}" class="transition hover:text-white">Mototsikllar</a>
+            <a href="{{ route('motorcycle.index') }}" class="transition hover:text-white">Katalog</a>
+            <a href="{{ route('comparison.index') }}" class="transition hover:text-white">Taqqoslash</a>
+            <a href="{{ route('quiz.index') }}" class="transition hover:text-white flex items-center gap-1">
+                <span>Quiz</span>
+                <span class="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-400">Yangi</span>
+            </a>
+            <a href="{{ route('news.index') }}" class="transition hover:text-white">Bilimlar bazasi</a>
+            <a href="{{ route('video.index') }}" class="transition hover:text-white">Video</a>
 
-            {{-- Bozor / Ehtiyot qismlar / Ustaxonalar unified under one dropdown —
-                 pure CSS (group-hover + focus-within), no JS needed. --}}
+            {{-- Bozor / Ehtiyot qismlar / Ustaxonalar unified under one dropdown --}}
             <div class="group relative">
                 <button type="button" class="flex items-center gap-1 transition hover:text-white">
                     Bozor
@@ -57,14 +127,51 @@
                                 <div class="text-xs text-white/50">{{ $item['desc'] }}</div>
                             </a>
                         @endforeach
+                        <div class="mt-1 border-t border-white/10 pt-1">
+                            <a href="{{ auth()->check() ? route('market.create') : route('register') }}" class="flex items-center gap-2 rounded-xl bg-amber-500/15 px-3 py-2 text-left text-sm font-semibold text-amber-400 transition hover:bg-amber-500/25">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                <span>+ E'lon joylashtirish</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <a href="{{ route('video.index') }}" class="transition hover:text-white">Video</a>
         </nav>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 sm:gap-3">
+            <a
+                href="{{ route('search.index') }}"
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white/70 hover:bg-white/10 hover:text-white transition active:scale-95"
+                title="Qidiruv"
+                aria-label="Qidiruv"
+            >
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+                </svg>
+            </a>
+
+            <button
+                type="button"
+                @click="$dispatch('open-phone-share')"
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white/70 hover:bg-white/10 hover:text-white transition active:scale-95"
+                title="Telefonda ochish (QR-kod)"
+                aria-label="Telefonda ochish"
+            >
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+            </button>
+
+            @auth
+                <a
+                    href="{{ route('market.create') }}"
+                    class="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-3.5 py-1.5 text-xs font-bold text-zinc-950 shadow-md transition hover:bg-amber-400 hover:scale-[1.03]"
+                >
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    <span>E'lon berish</span>
+                </a>
+            @endauth
+
             <a
                 href="{{ auth()->check() ? route('profile.edit') : route('login') }}"
                 class="hidden h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/10 text-sm font-semibold text-white md:flex"
@@ -364,40 +471,127 @@
 
     {{-- ===================== LIVE APP DASHBOARD (real data) ==================== --}}
     {{-- Where the marketing story hands off to the actual product: catalog,
-         listings and news pulled live from the database, in the app's existing
-         mobile-first layout. --}}
+         listings, knowledge base, quiz and videos pulled live from the database,
+         in a high-performance mobile-first layout. --}}
     <div id="ilova" class="scroll-mt-16 border-t border-white/10 bg-[var(--landing-bg)] pt-14">
-        <p class="text-center text-xs font-semibold uppercase tracking-widest text-[var(--landing-accent)]">Hoziroq boshlang</p>
-        <h2 class="mt-2 px-6 text-center text-2xl font-extrabold sm:text-3xl">Motrix.uz ilovasidan foydalaning</h2>
+        <p class="text-center text-xs font-semibold uppercase tracking-widest text-[var(--landing-accent)]">Yagona Raqamli Ekotizim</p>
+        <h2 class="mt-2 px-6 text-center text-2xl font-extrabold sm:text-3xl">Motrix.uz imkoniyatlari</h2>
 
-        {{-- pb-24 clears the fixed mobile bottom tab bar below; md+ drops it since
-             that bar is phone-only. --}}
-        <div class="mx-auto max-w-lg space-y-7 py-10 pb-24 sm:max-w-2xl md:pb-10 lg:max-w-4xl">
+        {{-- pb-24 clears the fixed mobile bottom tab bar below; md+ drops it since that bar is phone-only. --}}
+        <div class="mx-auto max-w-lg space-y-7 py-8 pb-24 sm:max-w-2xl md:pb-10 lg:max-w-4xl">
 
-            {{-- Categories --}}
-            @if($categories->isNotEmpty())
+            {{-- 1. Quick Navigation Action Grid (Mobile-first, TT 2.A) --}}
+            <section class="px-4">
+                <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                    <a
+                        href="{{ route('motorcycle.index') }}"
+                        class="glass-panel group flex flex-col justify-between rounded-2xl p-3.5 transition hover:-translate-y-0.5 hover:border-amber-500/40"
+                    >
+                        <div class="flex items-center justify-between">
+                            <span class="text-2xl">🏍️</span>
+                            <span class="text-[10px] font-bold text-[var(--landing-accent)] opacity-0 group-hover:opacity-100 transition">Ochish →</span>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-xs font-bold text-white">Moto Katalog</div>
+                            <div class="text-[10px] text-white/50">Barcha modellar va filtrlar</div>
+                        </div>
+                    </a>
+
+                    <a
+                        href="{{ route('comparison.index') }}"
+                        class="glass-panel group flex flex-col justify-between rounded-2xl p-3.5 transition hover:-translate-y-0.5 hover:border-amber-500/40"
+                    >
+                        <div class="flex items-center justify-between">
+                            <span class="text-2xl">⚖️</span>
+                            <span class="text-[10px] font-bold text-[var(--landing-accent)] opacity-0 group-hover:opacity-100 transition">Ochish →</span>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-xs font-bold text-white">Taqqoslagich</div>
+                            <div class="text-[10px] text-white/50">Parametrlarni solishtirish</div>
+                        </div>
+                    </a>
+
+                    <a
+                        href="{{ route('quiz.index') }}"
+                        class="glass-panel group flex flex-col justify-between rounded-2xl p-3.5 transition hover:-translate-y-0.5 hover:border-amber-500/40 border-amber-500/20"
+                    >
+                        <div class="flex items-center justify-between">
+                            <span class="text-2xl">🏆</span>
+                            <span class="rounded bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-extrabold text-amber-400">Haftalik</span>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-xs font-bold text-white">Motrix Quiz</div>
+                            <div class="text-[10px] text-white/50">Bilimingizni sinang</div>
+                        </div>
+                    </a>
+
+                    <a
+                        href="{{ route('news.index') }}"
+                        class="glass-panel group flex flex-col justify-between rounded-2xl p-3.5 transition hover:-translate-y-0.5 hover:border-amber-500/40"
+                    >
+                        <div class="flex items-center justify-between">
+                            <span class="text-2xl">📚</span>
+                            <span class="text-[10px] font-bold text-[var(--landing-accent)] opacity-0 group-hover:opacity-100 transition">Ochish →</span>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-xs font-bold text-white">Bilimlar bazasi</div>
+                            <div class="text-[10px] text-white/50">Qo'llanmalar va moylar</div>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            {{-- 2. Popular Brands Shortcut (TT 2.A & 2.B) --}}
+            @if(isset($popularBrands) && $popularBrands->isNotEmpty())
                 <section class="px-4">
-                    <div class="flex gap-2 overflow-x-auto pb-1">
-                        @foreach($categories as $category)
-                            <a href="{{ route('motorcycle.index', ['category' => $category->slug]) }}" class="shrink-0 rounded-full bg-white/5 px-4 py-2 text-sm font-medium text-white/70 transition hover:bg-white/10">
-                                {{ $category->name }}
+                    <div class="mb-2 flex items-center justify-between">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-white/50">Mashhur brendlar</span>
+                        <a href="{{ route('motorcycle.index') }}" class="text-[11px] text-[var(--landing-accent)] hover:underline">Barcha brendlar →</a>
+                    </div>
+                    <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                        @foreach($popularBrands as $brand)
+                            <a
+                                href="{{ route('motorcycle.index', ['brand' => $brand->slug]) }}"
+                                class="shrink-0 rounded-xl glass-panel px-3 py-1.5 text-xs font-semibold text-white/80 transition hover:bg-white/10 hover:text-white"
+                            >
+                                {{ $brand->name }}
+                                <span class="ml-1 text-[10px] text-white/40">({{ $brand->motorcycles_count }})</span>
                             </a>
                         @endforeach
                     </div>
                 </section>
             @endif
 
-            {{-- Popular motorcycles — creative showcase --}}
+            {{-- 3. Categories --}}
+            @if($categories->isNotEmpty())
+                <section class="px-4">
+                    <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                        <a href="{{ route('motorcycle.index') }}" class="shrink-0 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white transition hover:bg-white/20">
+                            Barcha toifalar
+                        </a>
+                        @foreach($categories as $category)
+                            <a href="{{ route('motorcycle.index', ['category' => $category->slug]) }}" class="shrink-0 rounded-full bg-white/5 px-4 py-2 text-xs font-medium text-white/70 transition hover:bg-white/10">
+                                {{ $category->name }}
+                                @if(isset($category->motorcycles_count) && $category->motorcycles_count > 0)
+                                    <span class="ml-0.5 text-[10px] text-white/40">({{ $category->motorcycles_count }})</span>
+                                @endif
+                            </a>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
+            {{-- 4. Popular motorcycles — creative showcase --}}
             @if($popular->isNotEmpty())
                 <section>
                     <div class="mb-3 flex items-end justify-between px-4">
                         <div>
                             <p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--landing-accent)]">Reyting</p>
-                            <h2 class="text-lg font-black">Eng mashhur mototsikllar</h2>
+                            <h2 class="text-lg font-black text-white">Eng mashhur mototsikllar</h2>
                         </div>
-                        <a href="{{ route('motorcycle.index') }}" class="text-xs font-medium text-[var(--landing-accent)]">Barchasi →</a>
+                        <a href="{{ route('motorcycle.index', ['sort' => 'popular']) }}" class="text-xs font-medium text-[var(--landing-accent)] hover:underline">Barchasi →</a>
                     </div>
-                    <div class="flex snap-x gap-3 overflow-x-auto px-4 pb-2">
+                    <div class="flex snap-x gap-3 overflow-x-auto px-4 pb-2 scrollbar-none">
                         @foreach($popular as $i => $motorcycle)
                             <x-motorcycle-poster-card :motorcycle="$motorcycle" :rank="$i + 1" size="lg" />
                         @endforeach
@@ -405,14 +599,50 @@
                 </section>
             @endif
 
-            {{-- New models --}}
+            {{-- 5. Motrix Quiz Interactive Feature Banner (TT 2.D) --}}
+            @if(isset($activeQuiz) && $activeQuiz)
+                <section class="px-4">
+                    <div class="glass-panel relative overflow-hidden rounded-3xl border border-amber-500/30 p-5 sm:p-6 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="max-w-md">
+                                <span class="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-amber-400">
+                                    🏆 Yangi haftalik viktorina
+                                </span>
+                                <h3 class="mt-2 text-base font-extrabold text-white sm:text-lg">
+                                    {{ $activeQuiz->title }}
+                                </h3>
+                                <p class="mt-1 text-xs text-white/60 leading-relaxed">
+                                    {{ $activeQuiz->questions_count }} ta savolga javob bering, tushuntirishlarni o'rganing va haftalik g'oliblar reytingiga kiring!
+                                </p>
+                            </div>
+
+                            <div class="flex items-center gap-2 shrink-0">
+                                <a
+                                    href="{{ route('quiz.show', $activeQuiz) }}"
+                                    class="rounded-full bg-amber-500 px-5 py-2.5 text-xs font-bold text-white shadow transition hover:bg-amber-400 hover:scale-105"
+                                >
+                                    Ishtirok etish →
+                                </a>
+                                <a
+                                    href="{{ route('quiz.leaderboard', $activeQuiz) }}"
+                                    class="rounded-full border border-white/20 px-3.5 py-2.5 text-xs font-semibold text-white transition hover:bg-white/10"
+                                >
+                                    Reyting
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            @endif
+
+            {{-- 6. New models --}}
             @if($newest->isNotEmpty())
                 <section>
                     <div class="mb-3 flex items-center justify-between px-4">
-                        <h2 class="text-base font-bold">Yangi qo'shilgan modellar</h2>
-                        <a href="{{ route('motorcycle.index') }}" class="text-xs font-medium text-[var(--landing-accent)]">Barchasi →</a>
+                        <h2 class="text-base font-bold text-white">Yangi qo'shilgan modellar</h2>
+                        <a href="{{ route('motorcycle.index') }}" class="text-xs font-medium text-[var(--landing-accent)] hover:underline">Barchasi →</a>
                     </div>
-                    <div class="flex snap-x gap-3 overflow-x-auto px-4 pb-1">
+                    <div class="flex snap-x gap-3 overflow-x-auto px-4 pb-1 scrollbar-none">
                         @foreach($newest as $motorcycle)
                             <x-motorcycle-poster-card :motorcycle="$motorcycle" size="md" />
                         @endforeach
@@ -420,49 +650,107 @@
                 </section>
             @endif
 
-            {{-- AI videos --}}
-            @if($aiVideos->isNotEmpty())
+            {{-- 7. Bilimlar bazasi va Maqolalar (TT 2.A & 2.C) --}}
+            @if(isset($knowledgeArticles) && $knowledgeArticles->isNotEmpty())
                 <section>
                     <div class="mb-3 flex items-center justify-between px-4">
-                        <h2 class="text-base font-bold">AI videolar</h2>
-                        <a href="{{ route('video.index') }}" class="text-xs font-medium text-[var(--landing-accent)]">Barchasi →</a>
+                        <div>
+                            <p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--landing-accent)]">Bilimlar markazi</p>
+                            <h2 class="text-base font-bold text-white">Foydali mototsikl maqolalari</h2>
+                        </div>
+                        <a href="{{ route('news.index') }}" class="text-xs font-medium text-[var(--landing-accent)] hover:underline">Barcha maqolalar →</a>
                     </div>
-                    <div class="flex gap-3 overflow-x-auto px-4 pb-1">
-                        @foreach($aiVideos as $video)
-                            <a href="{{ route('video.show', $video) }}" class="w-40 shrink-0 overflow-hidden rounded-2xl glass-panel sm:w-48">
+                    <div class="space-y-3 px-4">
+                        @foreach($knowledgeArticles as $article)
+                            @php
+                                $readMins = max(1, (int) ceil(str_word_count(strip_tags($article->body)) / 180));
+                            @endphp
+                            <a href="{{ route('news.show', $article) }}" class="flex gap-3 rounded-2xl glass-panel p-3 transition hover:border-amber-500/30">
+                                @if($article->getFirstMediaUrl('cover'))
+                                    <img src="{{ $article->getFirstMediaUrl('cover') }}" alt="{{ $article->title }}" class="h-16 w-20 shrink-0 rounded-xl object-cover">
+                                @else
+                                    <div class="flex h-16 w-20 shrink-0 items-center justify-center rounded-xl bg-white/5 text-xl">📚</div>
+                                @endif
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-[10px] font-bold text-amber-400 uppercase tracking-wide">
+                                        {{ $article->category->name ?? 'Maqola' }}
+                                    </div>
+                                    <div class="truncate text-sm font-semibold text-white mt-0.5">{{ $article->title }}</div>
+                                    <div class="mt-1 flex items-center gap-2 text-xs text-white/40">
+                                        <span>⏱️ {{ $readMins }} daqiqa</span>
+                                        <span>•</span>
+                                        <span>{{ $article->published_at?->format('d.m.Y') }}</span>
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
+            {{-- 8. Motrix Videolari (TT 2.A & 2.E) --}}
+            @if(isset($featuredVideos) && $featuredVideos->isNotEmpty())
+                <section>
+                    <div class="mb-3 flex items-center justify-between px-4">
+                        <div>
+                            <p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--landing-accent)]">Media markaz</p>
+                            <h2 class="text-base font-bold text-white">Motrix videolari</h2>
+                        </div>
+                        <a href="{{ route('video.index') }}" class="text-xs font-medium text-[var(--landing-accent)] hover:underline">Barcha videolar →</a>
+                    </div>
+                    <div class="flex gap-3 overflow-x-auto px-4 pb-1 scrollbar-none">
+                        @foreach($featuredVideos as $video)
+                            <a href="{{ route('video.show', $video) }}" class="w-44 shrink-0 overflow-hidden rounded-2xl glass-panel group transition hover:border-amber-500/30">
                                 <div class="relative flex aspect-video items-center justify-center overflow-hidden bg-gradient-to-br from-white/10 to-white/[0.02] text-xl text-white/70">
                                     @if($video->thumbnail_url)
-                                        <img src="{{ $video->thumbnail_url }}" alt="{{ $video->title }}" class="absolute inset-0 h-full w-full object-cover" loading="lazy">
-                                        <span class="relative flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-sm backdrop-blur-sm">▶</span>
+                                        <img src="{{ $video->thumbnail_url }}" alt="{{ $video->title }}" class="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy">
+                                        <span class="relative flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-sm backdrop-blur-sm group-hover:bg-amber-500 group-hover:text-white transition">▶</span>
                                     @else
                                         ▶
                                     @endif
-                                    <span class="absolute left-2 top-2 rounded-full bg-violet-500/90 px-2 py-0.5 text-[10px] font-semibold text-white">AI</span>
+                                    @if($video->category)
+                                        <span class="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[9px] font-bold text-amber-400 backdrop-blur-sm">
+                                            {{ $video->category->name }}
+                                        </span>
+                                    @endif
                                 </div>
-                                <div class="truncate p-2.5 text-xs font-semibold">{{ $video->title }}</div>
+                                <div class="p-2.5">
+                                    <div class="truncate text-xs font-semibold text-white">{{ $video->title }}</div>
+                                    <div class="mt-0.5 text-[10px] text-white/40">
+                                        {{ $video->motorcycle ? $video->motorcycle->name : 'Motrix Media' }}
+                                    </div>
+                                </div>
                             </a>
                         @endforeach
                     </div>
                 </section>
             @endif
 
-            {{-- Market listings --}}
+            {{-- 9. Market listings --}}
             @if($listings->isNotEmpty())
                 <section>
                     <div class="mb-3 flex items-center justify-between px-4">
-                        <h2 class="text-base font-bold">Sotuvdagi e'lonlar</h2>
-                        <a href="{{ route('market.index') }}" class="text-xs font-medium text-[var(--landing-accent)]">Bozorga o'tish →</a>
+                        <h2 class="text-base font-bold text-white">Sotuvdagi e'lonlar</h2>
+                        <a href="{{ route('market.index') }}" class="text-xs font-medium text-[var(--landing-accent)] hover:underline">Bozorga o'tish →</a>
                     </div>
-                    <div class="flex gap-3 overflow-x-auto px-4 pb-1">
+                    <div class="flex gap-3 overflow-x-auto px-4 pb-1 scrollbar-none">
                         @foreach($listings as $listing)
-                            <a href="{{ route('market.show', $listing) }}" class="w-44 shrink-0 overflow-hidden rounded-2xl glass-panel">
-                                <div class="flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-white/10 to-white/[0.02] text-2xl font-black text-white/20">
-                                    {{ mb_substr($listing->motorcycle->brand->name ?? 'M', 0, 1) }}
+                            <a href="{{ route('market.show', $listing) }}" class="w-44 shrink-0 overflow-hidden rounded-2xl glass-panel group">
+                                <div class="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br from-white/10 to-white/[0.02]">
+                                    @if($listing->hasMedia('images'))
+                                        <img src="{{ $listing->getFirstMediaUrl('images') }}" alt="{{ $listing->motorcycle->name ?? $listing->custom_title }}" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
+                                    @else
+                                        <div class="text-2xl font-black text-white/20">
+                                            {{ mb_substr($listing->motorcycle->brand->name ?? 'M', 0, 1) }}
+                                        </div>
+                                    @endif
                                 </div>
                                 <div class="p-2.5">
-                                    <div class="truncate text-xs font-semibold">{{ $listing->motorcycle->name ?? $listing->custom_title }}</div>
+                                    <div class="truncate text-xs font-semibold text-white">{{ $listing->motorcycle->name ?? $listing->custom_title }}</div>
                                     <div class="text-[11px] text-white/40">{{ $listing->city->name ?? '' }}</div>
-                                    <div class="mt-1 text-sm font-bold text-[var(--landing-accent)]">${{ number_format($listing->price) }}</div>
+                                    <div class="mt-1 text-sm font-bold text-[var(--landing-accent)]">
+                                        {{ $listing->currency === 'USD' ? '$' : '' }}{{ number_format($listing->price) }}{{ $listing->currency === 'UZS' ? ' so\'m' : '' }}
+                                    </div>
                                 </div>
                             </a>
                         @endforeach
@@ -470,42 +758,17 @@
                 </section>
             @endif
 
-            {{-- AI assistant CTA --}}
+            {{-- 10. AI assistant CTA --}}
             <section class="px-4">
-                <a href="{{ route('aiassistant.index') }}" class="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-[var(--landing-accent-2)] to-[var(--landing-accent)] p-4 text-[#04121a]">
+                <a href="{{ route('aiassistant.index') }}" class="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-[var(--landing-accent-2)] to-[var(--landing-accent)] p-4 text-[#04121a] shadow-lg transition hover:scale-[1.01]">
                     <span class="text-2xl">🤖</span>
                     <div class="flex-1">
-                        <div class="text-sm font-bold">AI yordamchidan maslahat oling</div>
-                        <div class="text-xs opacity-80">"Yangi boshlovchiman, qaysi moto mos?"</div>
+                        <div class="text-sm font-bold">AI yordamchidan texnik maslahat oling</div>
+                        <div class="text-xs opacity-80">"Yangi boshlovchiman, byudjetimga qaysi mototsikl mos keladi?"</div>
                     </div>
-                    <span>→</span>
+                    <span class="font-bold">→</span>
                 </a>
             </section>
-
-            {{-- News --}}
-            @if($news->isNotEmpty())
-                <section>
-                    <div class="mb-3 flex items-center justify-between px-4">
-                        <h2 class="text-base font-bold">Yangiliklar</h2>
-                        <a href="{{ route('news.index') }}" class="text-xs font-medium text-[var(--landing-accent)]">Barchasi →</a>
-                    </div>
-                    <div class="space-y-3 px-4">
-                        @foreach($news as $article)
-                            <a href="{{ route('news.show', $article) }}" class="flex gap-3 rounded-2xl glass-panel p-3">
-                                @if($article->getFirstMediaUrl('cover'))
-                                    <img src="{{ $article->getFirstMediaUrl('cover') }}" alt="{{ $article->title }}" class="h-14 w-16 shrink-0 rounded-xl object-cover">
-                                @else
-                                    <div class="flex h-14 w-16 shrink-0 items-center justify-center rounded-xl bg-white/5 text-lg">📰</div>
-                                @endif
-                                <div class="flex-1">
-                                    <div class="truncate text-sm font-semibold">{{ $article->title }}</div>
-                                    <div class="text-xs text-white/40">{{ $article->published_at?->format('d.m.Y') }}</div>
-                                </div>
-                            </a>
-                        @endforeach
-                    </div>
-                </section>
-            @endif
 
         </div>
 
@@ -534,6 +797,9 @@
             <a href="#ilova" class="text-xs font-semibold text-[var(--landing-accent)]">Ilovaga o'tish →</a>
         </div>
     </footer>
+
+    <x-phone-share-modal />
+    <x-pwa-manager />
 
 </body>
 </html>

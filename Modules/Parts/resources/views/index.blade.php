@@ -1,4 +1,8 @@
-<x-layout title="Ehtiyot qismlar">
+<x-layout 
+    title="Moto ehtiyot qismlar va aksessuarlar"
+    description="Mototsikl ehtiyot qismlari, shinalar, moylar, shlemlar va aksessuarlar katalogi hamda narxlari O'zbekistonda."
+    keywords="moto qismlar, mototsikl zapchast, moto shlem, moto moy, motrix"
+>
     <div class="px-4 py-4">
         <div class="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
             <a href="{{ route('parts.index') }}" class="shrink-0 rounded-full px-4 py-1.5 text-sm font-medium {{ request()->missing('category') ? 'bg-amber-500 text-white' : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300' }}">Barchasi</a>

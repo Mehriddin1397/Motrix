@@ -106,4 +106,9 @@ class Motorcycle extends Model implements HasMedia
     {
         return $this->belongsToMany(Part::class, 'part_motorcycle');
     }
+
+    public function isElectric(): bool
+    {
+        return (bool) $this->specification?->isElectric();
+    }
 }

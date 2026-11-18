@@ -86,4 +86,9 @@ class Video extends Model
     {
         return $this->belongsTo(Motorcycle::class);
     }
+
+    public function articles(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\Modules\News\Models\News::class, 'video_id');
+    }
 }

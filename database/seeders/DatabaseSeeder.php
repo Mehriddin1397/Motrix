@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(RolesAndPermissionsSeeder::class);
         $this->call(CountrySeeder::class);
+        $this->call(CitySeeder::class);
 
         $admin = User::factory()->create([
             'name' => 'Motrix Admin',
@@ -48,5 +49,8 @@ class DatabaseSeeder extends Seeder
         $plainUser->assignRole('user');
 
         $this->call(DemoDataSeeder::class);
+        $this->call(KnowledgeBaseSeeder::class);
+        $this->call(QuizSeeder::class);
+        $this->call(VideoCategorySeeder::class);
     }
 }

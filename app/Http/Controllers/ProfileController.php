@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\City;
 use App\Models\SavedItem;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,10 +30,10 @@ class ProfileController extends Controller
         $listingStats = null;
         $conversations = null;
 
-        if ($user->isMotoSeller()) {
+        if ($user->can('listings.create') || $user->isMotoSeller()) {
             $listings = Listing::query()
                 ->where('user_id', $user->id)
-                ->with(['motorcycle', 'brand', 'city'])
+                ->with(['motorcycle.brand', 'brand', 'city', 'media'])
                 ->latest()
                 ->limit(10)
                 ->get();
@@ -76,12 +78,16 @@ class ProfileController extends Controller
 
         $promotions = null;
 
-        if ($user->isMotoSeller() || $user->isPartsSeller()) {
+        if ($user->can('listings.create') || $user->isMotoSeller() || $user->isPartsSeller()) {
             $promotions = $user->adPromotions()->with('promotable')->latest()->limit(10)->get();
         }
 
+        $userShop = $user->shop;
+        $shopRequest = $user->shopRequests()->latest()->first();
+
         return view('profile.edit', [
             'user' => $user,
+            'cities' => City::query()->orderBy('name')->get(),
             'trustProfile' => $trustProfile,
             'listings' => $listings,
             'listingStats' => $listingStats,
@@ -90,6 +96,35 @@ class ProfileController extends Controller
             'partStats' => $partStats,
             'promotions' => $promotions,
             'promotionTiers' => config('access.promotions.tiers'),
+            'userShop' => $userShop,
+            'shopRequest' => $shopRequest,
+        ]);
+    }
+
+    /**
+     * Display the public profile of a seller.
+     */
+    public function show(User $user): View
+    {
+        $user->load(['city', 'trustProfile', 'shops', 'shop.city']);
+
+        $listings = Listing::query()
+            ->where('user_id', $user->id)
+            ->where('status', 'active')
+            ->with(['motorcycle.brand', 'brand', 'city', 'media'])
+            ->latest('published_at')
+            ->paginate(12);
+
+        $totalViews = (int) Listing::where('user_id', $user->id)->sum('views_count');
+        $activeCount = Listing::where('user_id', $user->id)->where('status', 'active')->count();
+        $soldCount = Listing::where('user_id', $user->id)->where('status', 'sold')->count();
+
+        return view('profile.show', [
+            'seller' => $user,
+            'listings' => $listings,
+            'totalViews' => $totalViews,
+            'activeCount' => $activeCount,
+            'soldCount' => $soldCount,
         ]);
     }
 
@@ -98,13 +133,27 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $validated = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($request->boolean('remove_avatar')) {
+            $user->clearMediaCollection('avatar');
+            $user->avatar = null;
+        } elseif ($request->hasFile('avatar')) {
+            $user->clearMediaCollection('avatar');
+            $media = $user->addMediaFromRequest('avatar')->toMediaCollection('avatar');
+            $user->avatar = $media->getUrl();
         }
 
-        $request->user()->save();
+        unset($validated['avatar'], $validated['remove_avatar']);
+
+        $user->fill($validated);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

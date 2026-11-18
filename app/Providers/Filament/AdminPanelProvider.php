@@ -7,10 +7,12 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\MenuItem;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -41,6 +43,16 @@ class AdminPanelProvider extends PanelProvider
                     ->url(fn () => route('home'))
                     ->icon('heroicon-o-arrow-uturn-left'),
             ])
+            ->navigationItems([
+                NavigationItem::make('Bosh sahifaga qaytish')
+                    ->url(fn () => route('home'))
+                    ->icon('heroicon-o-arrow-left-on-rectangle')
+                    ->sort(-1),
+            ])
+            ->renderHook(
+                PanelsRenderHook::USER_MENU_BEFORE,
+                fn () => view('filament.components.back-to-site'),
+            )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([

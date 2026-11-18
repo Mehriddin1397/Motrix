@@ -153,6 +153,11 @@ return [
             'ai-assistant.use',
             'reviews.create',
             'community.post',
+            'listings.create',
+            'listings.update',
+            'listings.delete',
+            'listings.publish',
+            'listings.promote',
         ],
     ],
 

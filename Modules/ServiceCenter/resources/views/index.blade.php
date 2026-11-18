@@ -1,4 +1,8 @@
-<x-layout title="Servislar">
+<x-layout 
+    title="Moto servislar va ustaxonalar"
+    description="O'zbekistonda mototsikllarni ta'mirlash, texnik xizmat ko'rsatish va ustaxonalar katalogi."
+    keywords="moto servis, moto ustaxona toshkent, mototsikl tamirlash, motrix"
+>
     <div class="px-4 py-4">
         <div class="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
             <a href="{{ route('servicecenter.index') }}" class="shrink-0 rounded-full px-4 py-1.5 text-sm font-medium {{ request()->missing('category') ? 'bg-amber-500 text-white' : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300' }}">Barchasi</a>
@@ -24,7 +28,12 @@
                                     <span class="text-amber-500" title="Tasdiqlangan">✓</span>
                                 @endif
                             </div>
-                            <div class="text-xs text-zinc-500 dark:text-zinc-400">{{ $provider->category->name ?? '' }} · {{ $provider->city->name ?? '' }}</div>
+                            <div class="text-xs text-zinc-500 dark:text-zinc-400">
+                                {{ $provider->category->name ?? '' }} · {{ $provider->city->name ?? '' }}
+                                @if($provider->hasCoordinates())
+                                    <span class="ml-1 text-emerald-600 dark:text-emerald-400 font-medium">· 📍 Marshrut</span>
+                                @endif
+                            </div>
                         </div>
                         @if($provider->rating_avg > 0)
                             <div class="text-sm font-semibold text-amber-500">★ {{ number_format($provider->rating_avg, 1) }}</div>

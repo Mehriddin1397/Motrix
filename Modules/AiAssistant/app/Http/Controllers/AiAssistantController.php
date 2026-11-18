@@ -19,6 +19,13 @@ class AiAssistantController extends Controller
                 ->latest('started_at')
                 ->with('messages')
                 ->first();
+        } else {
+            $sessionToken = $request->session()->getId();
+            $conversation = AiConversation::query()
+                ->where('session_token', $sessionToken)
+                ->latest('started_at')
+                ->with('messages')
+                ->first();
         }
 
         return view('aiassistant::index', compact('conversation'));
@@ -26,16 +33,24 @@ class AiAssistantController extends Controller
 
     public function store(Request $request, GeminiChatService $gemini)
     {
-        $this->authorize('ai-assistant.use');
-
         $data = $request->validate([
             'message' => ['required', 'string', 'max:2000'],
         ]);
 
-        $conversation = AiConversation::firstOrCreate(
-            ['user_id' => $request->user()->id],
-            ['session_token' => (string) str()->uuid(), 'started_at' => now()]
-        );
+        $user = $request->user();
+        $sessionToken = $request->session()->getId();
+
+        if ($user) {
+            $conversation = AiConversation::firstOrCreate(
+                ['user_id' => $user->id],
+                ['session_token' => $sessionToken, 'started_at' => now()]
+            );
+        } else {
+            $conversation = AiConversation::firstOrCreate(
+                ['session_token' => $sessionToken, 'user_id' => null],
+                ['started_at' => now()]
+            );
+        }
 
         $conversation->messages()->create([
             'role' => 'user',

@@ -40,4 +40,19 @@ return [
         'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
+        'site_verification' => env('GOOGLE_SITE_VERIFICATION'),
+    ],
+
+    'eskiz' => [
+        'base_url' => env('ESKIZ_BASE_URL', 'https://notify.eskiz.uz'),
+        'email' => env('ESKIZ_EMAIL'),
+        'password' => env('ESKIZ_PASSWORD'),
+        'from' => env('ESKIZ_FROM', '4546'),
+        'admin_phone' => env('ADMIN_SMS_PHONE', '+998942551397'),
+    ],
+
 ];

@@ -17,4 +17,6 @@ Route::middleware(['auth', 'verified', 'permission:news.manage'])->group(functio
     Route::delete('news/{article}', [NewsController::class, 'destroy'])->name('news.destroy');
 });
 
+Route::post('news/{article:slug}/comments', [NewsController::class, 'addComment'])->middleware('auth')->name('news.comments.store');
+
 Route::get('news/{article:slug}', [NewsController::class, 'show'])->name('news.show');

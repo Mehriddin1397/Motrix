@@ -11,10 +11,17 @@
         <meta name="theme-color" content="#18181b" media="(prefers-color-scheme: dark)">
         <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta name="robots" content="noindex, nofollow">
 
         <title>{{ config('app.name', 'Motrix') }}</title>
 
         <link rel="icon" type="image/png" href="{{ asset('images/logo-icon-black.png') }}">
+        <link rel="manifest" href="/manifest.json">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="Motrix">
+        <link rel="apple-touch-icon" href="{{ asset('images/icon-192.png') }}">
 
         <script>
             if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -34,10 +41,23 @@
             <div class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-gradient-to-br from-zinc-900 via-zinc-900 to-amber-900 dark:from-zinc-950 dark:via-zinc-950 dark:to-amber-950/60"></div>
 
             <header class="flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-                <a href="{{ route('home') }}" class="flex items-center gap-2">
-                    <img src="{{ asset('images/logo-icon-white.png') }}" alt="Motrix" class="block h-8 w-auto">
-                    <span class="text-lg font-bold tracking-tight text-white">Motrix</span>
-                </a>
+                <div class="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href = '{{ route('home') }}'; }"
+                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white active:scale-95"
+                        title="Orqaga"
+                        aria-label="Orqaga"
+                    >
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <a href="{{ route('home') }}" class="flex items-center gap-2">
+                        <img src="{{ asset('images/logo-icon-white.png') }}" alt="Motrix" class="block h-8 w-auto">
+                        <span class="text-lg font-bold tracking-tight text-white">Motrix</span>
+                    </a>
+                </div>
 
                 <button
                     type="button"
@@ -59,5 +79,6 @@
             </main>
 
         </div>
+        <x-pwa-manager />
     </body>
 </html>

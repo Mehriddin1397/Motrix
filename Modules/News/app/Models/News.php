@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Modules\Community\Models\Comment;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Sluggable\HasSlug;
@@ -17,7 +19,7 @@ class News extends Model implements HasMedia
 
     protected $table = 'news';
 
-    protected $fillable = ['category_id', 'author_id', 'title', 'slug', 'body', 'status', 'published_at'];
+    protected $fillable = ['category_id', 'video_id', 'author_id', 'title', 'slug', 'body', 'status', 'published_at'];
 
     protected function casts(): array
     {
@@ -38,6 +40,11 @@ class News extends Model implements HasMedia
         $this->addMediaCollection('cover')->singleFile();
     }
 
+    public function video(): BelongsTo
+    {
+        return $this->belongsTo(\Modules\Video\Models\Video::class, 'video_id');
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(NewsCategory::class, 'category_id');
@@ -46,5 +53,10 @@ class News extends Model implements HasMedia
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
+    }
+
+    public function comments(): MorphMany
+    {
+        return $this->morphMany(Comment::class, 'commentable')->whereNull('parent_id')->latest();
     }
 }

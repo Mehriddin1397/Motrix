@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use App\Models\AdPromotion;
+use App\Models\City;
 use App\Models\Setting;
 use App\Models\User;
 use App\Policies\AdPromotionPolicy;
 use App\Policies\BrandPolicy;
+use App\Policies\CityPolicy;
 use App\Policies\CommentPolicy;
 use App\Policies\CommunityGroupPolicy;
 use App\Policies\ConversationPolicy;
@@ -58,6 +60,7 @@ class AppServiceProvider extends ServiceProvider
      */
     protected array $policies = [
         User::class => UserPolicy::class,
+        City::class => CityPolicy::class,
         Listing::class => ListingPolicy::class,
         ListingReport::class => ListingReportPolicy::class,
         Conversation::class => ConversationPolicy::class,
@@ -93,12 +96,26 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Kerio terminates TLS at the network edge and forwards plain HTTP to
-        // this app, so Laravel never sees an https request directly. Force
-        // the scheme here so generated asset/route URLs match the public
-        // https:// address instead of triggering mixed-content blocks.
-        if (str_starts_with(config('app.url'), 'https://')) {
-            URL::forceScheme('https');
+        // When accessed via IP or localhost directly (e.g. http://192.168.40.62),
+        // plain HTTP must be preserved so CSS/JS and assets load without SSL errors.
+        // When accessed via public domain (e.g. motrix.uz), Kerio/reverse proxy terminates
+        // TLS at the edge and forwards plain HTTP, so we force HTTPS to prevent mixed-content blocks.
+        if (! $this->app->runningInConsole()) {
+            $host = request()->getHost();
+            $isIpOrLocal = filter_var($host, FILTER_VALIDATE_IP) !== false || in_array($host, ['localhost', '127.0.0.1']);
+
+            if ($isIpOrLocal) {
+                URL::forceScheme('http');
+                $scheme = 'http://';
+            } elseif (str_starts_with(config('app.url'), 'https://') || request()->isSecure()) {
+                URL::forceScheme('https');
+                $scheme = 'https://';
+            } else {
+                $scheme = request()->isSecure() ? 'https://' : 'http://';
+            }
+
+            $currentBaseUrl = $scheme . request()->getHttpHost();
+            config(['filesystems.disks.public.url' => $currentBaseUrl . '/storage']);
         }
 
         foreach ($this->policies as $model => $policy) {

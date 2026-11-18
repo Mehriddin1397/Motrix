@@ -21,6 +21,7 @@ class Listing extends Model implements HasMedia
 
     protected $fillable = [
         'user_id',
+        'shop_id',
         'motorcycle_id',
         'brand_id',
         'custom_title',
@@ -57,6 +58,21 @@ class Listing extends Model implements HasMedia
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function shop(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Shop::class);
+    }
+
+    public function effectiveShop(): ?\App\Models\Shop
+    {
+        return $this->shop ?: $this->user?->motoShop;
+    }
+
+    public function isFromShop(): bool
+    {
+        return $this->effectiveShop() !== null;
     }
 
     public function motorcycle(): BelongsTo

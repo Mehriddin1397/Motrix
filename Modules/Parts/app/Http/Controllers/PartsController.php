@@ -40,6 +40,10 @@ class PartsController extends Controller
 
         $part = new Part($data);
         $part->seller_id = $request->user()->id;
+        $userShop = $request->user()->partsShop ?: $request->user()->motoShop ?: $request->user()->shop;
+        if ($userShop) {
+            $part->shop_id = $userShop->id;
+        }
         $part->status = Part::determineInitialStatus($request->user());
         $part->save();
 
@@ -54,7 +58,8 @@ class PartsController extends Controller
 
     public function show(Part $part)
     {
-        $part->load(['category', 'seller', 'motorcycles.brand']);
+        $part->incrementQuietly('views_count');
+        $part->load(['category', 'seller.city', 'seller.shops', 'shop.city', 'motorcycles.brand']);
 
         return view('parts::show', compact('part'));
     }

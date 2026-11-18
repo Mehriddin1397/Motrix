@@ -11,14 +11,29 @@ class VideoController extends Controller
 {
     public function index(Request $request)
     {
-        $videos = Video::query()
-            ->with(['category', 'motorcycle.brand'])
-            ->when($request->category, fn ($query, $slug) => $query->whereHas('category', fn ($c) => $c->where('slug', $slug)))
-            ->latest('published_at')
+        $query = Video::query()
+            ->with(['category', 'motorcycle.brand']);
+
+        if ($cat = $request->input('category')) {
+            $query->whereHas('category', fn ($c) => $c->where('slug', $cat));
+        }
+
+        if ($q = trim($request->input('q', ''))) {
+            $query->where('title', 'like', "%{$q}%");
+        }
+
+        if ($moto = $request->input('motorcycle')) {
+            $query->whereHas('motorcycle', fn ($m) => $m->where('slug', $moto));
+        }
+
+        $videos = $query->latest('published_at')
             ->paginate(12)
             ->withQueryString();
 
-        $categories = VideoCategory::query()->orderBy('name')->get();
+        $categories = VideoCategory::query()
+            ->withCount('videos')
+            ->orderBy('name')
+            ->get();
 
         return view('video::index', compact('videos', 'categories'));
     }
@@ -32,10 +47,18 @@ class VideoController extends Controller
 
     public function show(Video $video)
     {
-        $video->load(['category', 'motorcycle.brand']);
+        $video->load(['category', 'motorcycle.brand', 'motorcycle.specification', 'articles']);
         $video->increment('views_count');
 
-        return view('video::show', compact('video'));
+        $relatedVideos = Video::query()
+            ->with(['category', 'motorcycle.brand'])
+            ->where('id', '!=', $video->id)
+            ->when($video->category_id, fn ($q) => $q->where('category_id', $video->category_id))
+            ->latest('published_at')
+            ->limit(4)
+            ->get();
+
+        return view('video::show', compact('video', 'relatedVideos'));
     }
 
     public function edit(Video $video)

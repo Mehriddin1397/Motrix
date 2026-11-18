@@ -21,6 +21,7 @@ class Part extends Model implements HasMedia
 
     protected $fillable = [
         'seller_id',
+        'shop_id',
         'category_id',
         'name',
         'slug',
@@ -58,6 +59,16 @@ class Part extends Model implements HasMedia
     public function seller(): BelongsTo
     {
         return $this->belongsTo(User::class, 'seller_id');
+    }
+
+    public function shop(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Shop::class);
+    }
+
+    public function effectiveShop(): ?\App\Models\Shop
+    {
+        return $this->shop ?: $this->seller?->partsShop ?: $this->seller?->motoShop;
     }
 
     public function category(): BelongsTo

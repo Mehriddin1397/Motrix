@@ -49,7 +49,11 @@
             </span>
         @endif
 
-        @if($motorcycle->specification?->beginner_friendly)
+        @if($motorcycle->isElectric())
+            <span class="absolute right-3 top-3 rounded-full bg-blue-600/90 px-2.5 py-0.5 text-[10px] font-bold text-white shadow backdrop-blur">
+                ⚡ Elektr
+            </span>
+        @elseif($motorcycle->specification?->beginner_friendly)
             <span class="absolute right-3 top-3 rounded-full bg-emerald-500/90 px-2 py-0.5 text-[10px] font-bold text-white">
                 Boshlovchi uchun
             </span>
@@ -61,6 +65,14 @@
 
             @if($motorcycle->specification)
                 <div class="mt-2 flex flex-wrap gap-1.5">
+                    @if($motorcycle->isElectric())
+                        @if($motorcycle->specification->range_km)
+                            <span class="rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur">{{ $motorcycle->specification->range_km }} km zapas</span>
+                        @endif
+                        @if($motorcycle->specification->battery_capacity_kwh)
+                            <span class="rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur">{{ $motorcycle->specification->battery_capacity_kwh }} kWh</span>
+                        @endif
+                    @endif
                     @if($motorcycle->specification->horsepower)
                         <span class="rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur">{{ $motorcycle->specification->horsepower }} HP</span>
                     @endif

@@ -1,4 +1,22 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /profile
+Disallow: /profile/*
+Disallow: /dashboard
+Disallow: /market/create
+Disallow: /market/*/edit
+Disallow: /market/conversations
+Disallow: /market/conversations/*
+Disallow: /parts/create
+Disallow: /parts/*/edit
+Disallow: /promotions
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /livewire/*
 
 Sitemap: https://motrix.uz/sitemap.xml
+Host: https://motrix.uz
