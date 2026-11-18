@@ -27,7 +27,7 @@
                             alt="{{ $user->name }}" 
                             referrerpolicy="no-referrer"
                             class="h-full w-full object-cover"
-                            @error="preview = null"
+                            x-on:error="preview = null"
                         >
                     </template>
                     <template x-if="!preview">
