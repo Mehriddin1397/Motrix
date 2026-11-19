@@ -753,6 +753,8 @@ class UzbekistanMarketMotorcyclesSeeder extends Seeder
                     'year_start' => $item['year_start'],
                     'year_end' => $item['year_end'],
                     'description' => $item['desc'],
+                    'meta_title' => $item['meta_title'] ?? ($item['name'] . " — Texnik xususiyatlari, narxi va ma'lumot | Motrix.uz"),
+                    'meta_description' => $item['meta_description'] ?? ($item['name'] . " haqida to'liq ma'lumot: narxlar, texnik xususiyatlar va O'zbekiston bozoridagi e'lonlar Motrix.uz da."),
                     'status' => 'published',
                     'views_count' => rand(120, 650),
                 ]

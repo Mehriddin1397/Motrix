@@ -2,7 +2,7 @@
     $spec = $motorcycle->specification;
     $isElectric = (bool) $spec?->isElectric();
     $motoTitle = $motorcycle->name . ($motorcycle->brand ? ' (' . $motorcycle->brand->name . ')' : '');
-    $seoTitle = $motoTitle . ($isElectric ? " (Elektr mototsikl)" : "") . " — Narxlari va texnik xususiyatlari";
+    $seoTitle = $motorcycle->meta_title ?: ($motoTitle . ($isElectric ? " (Elektr mototsikl)" : "") . " — Narxlari va texnik xususiyatlari");
     $coverUrl = $motorcycle->getFirstMediaUrl('cover') ?: null;
 
     if ($isElectric) {
@@ -18,7 +18,7 @@
     }
 
     $specsSummary = implode(', ', $descParts);
-    $seoDesc = "{$motoTitle} mototsikli haqida to'liq ma'lumot, narxlar, texnik ko'rsatkichlar" . ($specsSummary ? " ({$specsSummary})" : "") . " va e'lonlar Motrix.uz da.";
+    $seoDesc = $motorcycle->meta_description ?: ("{$motoTitle} mototsikli haqida to'liq ma'lumot, narxlar, texnik ko'rsatkichlar" . ($specsSummary ? " ({$specsSummary})" : "") . " va e'lonlar Motrix.uz da.");
 
     $motorcycleSchema = [
         '@context' => 'https://schema.org',

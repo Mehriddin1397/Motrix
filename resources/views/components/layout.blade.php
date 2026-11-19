@@ -12,7 +12,13 @@
 ])
 @php
     $siteName = config('app.name', 'Motrix');
-    $pageTitle = $title ? "{$title} — {$siteName}" : "{$siteName} — O'zbekistonda mototsikllar bozori va e'lonlar platformasi";
+    if ($title) {
+        $pageTitle = (str_contains($title, $siteName) || str_contains($title, 'Motrix.uz'))
+            ? $title
+            : "{$title} — {$siteName}";
+    } else {
+        $pageTitle = "{$siteName} — O'zbekistonda mototsikllar bozori va e'lonlar platformasi";
+    }
     
     $defaultDescription = "Motrix.uz — O'zbekistonda mototsikl ixlosmandlari uchun birinchi ekotizim: mototsikllar bozori, e'lonlar, ehtiyot qismlar, servis markazlari va texnik katalog.";
     $metaDescription = $description ?: $defaultDescription;
