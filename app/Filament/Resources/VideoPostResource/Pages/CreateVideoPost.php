@@ -17,6 +17,8 @@ class CreateVideoPost extends CreateRecord
             $data['published_at'] = now();
         }
 
+        $data['send_to_facebook'] = false;
+
         return $data;
     }
 

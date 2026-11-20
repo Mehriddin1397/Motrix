@@ -70,21 +70,17 @@ class VideoPostResource extends Resource
                     ->description('Video yuklangach, orqa fonda quyidagi tanlangan platformalarga avtomatik joylanadi:')
                     ->schema([
                         Forms\Components\Toggle::make('send_to_telegram')
-                            ->label('Telegram kanalga yuborish')
+                            ->label('Telegram (Kanal va Guruh)')
                             ->default(true),
 
                         Forms\Components\Toggle::make('send_to_youtube')
                             ->label('YouTube kanalga yuklash')
                             ->default(true),
 
-                        Forms\Components\Toggle::make('send_to_facebook')
-                            ->label('Facebook sahifaga joylash')
-                            ->default(true),
-
                         Forms\Components\Toggle::make('send_to_instagram')
                             ->label('Instagram (Reels) ga yuklash')
                             ->default(true),
-                    ])->columns(4),
+                    ])->columns(3),
 
                 Forms\Components\Section::make('Tarqatish holatlari va xatoliklar jurnali')
                     ->collapsed()
@@ -98,10 +94,6 @@ class VideoPostResource extends Resource
                             ->label('YouTube holati')
                             ->content(fn (?VideoPost $record) => $record ? "Holat: {$record->youtube_status}" . ($record->youtube_video_id ? " (Video ID: {$record->youtube_video_id})" : "") : '-'),
 
-                        Forms\Components\Placeholder::make('facebook_info')
-                            ->label('Facebook holati')
-                            ->content(fn (?VideoPost $record) => $record ? "Holat: {$record->facebook_status}" . ($record->facebook_post_id ? " (Post ID: {$record->facebook_post_id})" : "") : '-'),
-
                         Forms\Components\Placeholder::make('instagram_info')
                             ->label('Instagram holati')
                             ->content(fn (?VideoPost $record) => $record ? "Holat: {$record->instagram_status}" . ($record->instagram_media_id ? " (Media ID: {$record->instagram_media_id})" : "") : '-'),
@@ -110,7 +102,7 @@ class VideoPostResource extends Resource
                             ->label('Xatoliklar matni (Error Log)')
                             ->disabled()
                             ->columnSpanFull(),
-                    ])->columns(2),
+                    ])->columns(3),
             ]);
     }
 
@@ -141,17 +133,6 @@ class VideoPostResource extends Resource
 
                 Tables\Columns\TextColumn::make('youtube_status')
                     ->label('YouTube')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'success' => 'success',
-                        'failed' => 'danger',
-                        'processing' => 'warning',
-                        'skipped' => 'gray',
-                        default => 'info',
-                    }),
-
-                Tables\Columns\TextColumn::make('facebook_status')
-                    ->label('Facebook')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'success' => 'success',

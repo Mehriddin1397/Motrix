@@ -54,21 +54,22 @@ class ListVideoPosts extends ListRecords
                         ->required()
                         ->helperText('Facebook sahifangizga ulangan Instagram hisob ID raqami'),
 
-                    Forms\Components\TextInput::make('facebook_page_id')
-                        ->label('Facebook Page ID (ixtiyoriy)')
-                        ->placeholder('1092837465...')
-                        ->default(fn () => Setting::get('facebook_page_id', config('services.meta.facebook_page_id'))),
+                    Forms\Components\TextInput::make('telegram_group_id')
+                        ->label('Telegram Guruh ID yoki username (ixtiyoriy)')
+                        ->placeholder('Masalan: @motrix_group yoki -100...')
+                        ->default(fn () => Setting::get('telegram_group_id', config('services.telegram.group_id')))
+                        ->helperText('Agar guruhga ham video tashlanishini xohlasangiz, guruh username yoki ID sini kiriting (bot guruhda ham admin/a\'zo bo\'lishi kerak).'),
                 ])
                 ->action(function (array $data) {
                     Setting::set('meta_page_access_token', $data['meta_page_access_token']);
                     Setting::set('instagram_account_id', $data['instagram_account_id']);
-                    if (! empty($data['facebook_page_id'])) {
-                        Setting::set('facebook_page_id', $data['facebook_page_id']);
+                    if (! empty($data['telegram_group_id'])) {
+                        Setting::set('telegram_group_id', $data['telegram_group_id']);
                     }
 
                     Notification::make()
-                        ->title('Meta sozlamalari saqlandi!')
-                        ->body('Instagram va Facebook ulanish ma\'lumotlari yangilandi.')
+                        ->title('Sozlamalar saqlandi!')
+                        ->body('Instagram va Telegram guruh sozlamalari yangilandi.')
                         ->success()
                         ->send();
                 }),

@@ -11,11 +11,13 @@ class TelegramPublisherService
 {
     protected ?string $botToken;
     protected ?string $chatId;
+    protected ?string $groupId;
 
     public function __construct()
     {
         $this->botToken = config('services.telegram.bot_token');
         $this->chatId = config('services.telegram.chat_id');
+        $this->groupId = config('services.telegram.group_id') ?: \App\Models\Setting::get('telegram_group_id');
     }
 
     public function isConfigured(): bool
@@ -110,6 +112,23 @@ class TelegramPublisherService
 
             $result = $response->json('result');
             $messageId = $result['message_id'] ?? null;
+            $fileId = $result['video']['file_id'] ?? null;
+
+            // Agar Telegram guruh ham sozlangan bo'lsa, qayta yuklamasdan file_id orqali guruhga ham zudlik bilan yuborish
+            if ($this->groupId && $fileId) {
+                try {
+                    Http::timeout(30)->post("https://api.telegram.org/bot{$this->botToken}/sendVideo", [
+                        'chat_id' => $this->groupId,
+                        'video' => $fileId,
+                        'caption' => $caption,
+                        'parse_mode' => 'HTML',
+                        'supports_streaming' => true,
+                    ]);
+                    Log::info("Telegram guruhga ham video yuborildi: {$this->groupId}");
+                } catch (\Throwable $e) {
+                    Log::warning("Telegram guruhga yuborishda xatolik: " . $e->getMessage());
+                }
+            }
 
             return [
                 'success' => true,
