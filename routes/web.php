@@ -9,6 +9,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\ShopRequestController;
+use App\Http\Controllers\VideoPostController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -50,6 +51,10 @@ Route::post('/quiz/{quiz:slug}/check', [QuizController::class, 'checkAnswer'])->
 Route::post('/quiz/{quiz:slug}/submit', [QuizController::class, 'submit'])->name('quiz.submit');
 Route::get('/quiz/{quiz:slug}/result/{attempt}', [QuizController::class, 'result'])->name('quiz.result');
 Route::get('/quiz/{quiz:slug}/leaderboard', [QuizController::class, 'leaderboard'])->name('quiz.leaderboard');
+
+// Video Postlar (Ijtimoiy tarmoqlar va sayt videolari)
+Route::get('/video-posts', [VideoPostController::class, 'index'])->name('video-posts.index');
+Route::get('/video-posts/{slug}', [VideoPostController::class, 'show'])->name('video-posts.show');
 
 Route::get('/dashboard', function () {
     $user = auth()->user();

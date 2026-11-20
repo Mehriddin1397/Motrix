@@ -55,4 +55,21 @@ return [
         'admin_phone' => env('ADMIN_SMS_PHONE', '+998942551397'),
     ],
 
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'chat_id' => env('TELEGRAM_CHAT_ID'),
+    ],
+
+    'meta' => [
+        'page_access_token' => env('META_PAGE_ACCESS_TOKEN'),
+        'facebook_page_id' => env('FACEBOOK_PAGE_ID'),
+        'instagram_account_id' => env('INSTAGRAM_ACCOUNT_ID'),
+    ],
+
+    'youtube' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'refresh_token' => env('GOOGLE_YOUTUBE_REFRESH_TOKEN'),
+    ],
+
 ];

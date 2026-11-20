@@ -6,6 +6,7 @@ use App\Models\AdPromotion;
 use App\Models\City;
 use App\Models\Setting;
 use App\Models\User;
+use App\Models\VideoPost;
 use App\Policies\AdPromotionPolicy;
 use App\Policies\BrandPolicy;
 use App\Policies\CityPolicy;
@@ -81,6 +82,7 @@ class AppServiceProvider extends ServiceProvider
         MotorcycleReview::class => MotorcycleReviewPolicy::class,
         AdPromotion::class => AdPromotionPolicy::class,
         Setting::class => SettingPolicy::class,
+        VideoPost::class => \App\Policies\VideoPostPolicy::class,
     ];
 
     /**
