@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Log;
 
 class YouTubeOAuthController extends Controller
 {
+    protected function getRedirectUri(): string
+    {
+        return 'https://motrix.uz/admin/youtube/callback';
+    }
+
     /**
      * Redirect admin to Google OAuth consent screen for YouTube upload permission.
      */
@@ -22,7 +27,7 @@ class YouTubeOAuthController extends Controller
             return redirect('/admin/video-posts')->with('error', 'Google Client ID sozlanmagan.');
         }
 
-        $redirectUri = url('/admin/youtube/callback');
+        $redirectUri = $this->getRedirectUri();
         $scopes = [
             'https://www.googleapis.com/auth/youtube.upload',
             'https://www.googleapis.com/auth/youtube',
@@ -62,7 +67,7 @@ class YouTubeOAuthController extends Controller
 
         $clientId = config('services.youtube.client_id') ?: config('services.google.client_id');
         $clientSecret = config('services.youtube.client_secret') ?: config('services.google.client_secret');
-        $redirectUri = url('/admin/youtube/callback');
+        $redirectUri = $this->getRedirectUri();
 
         try {
             $response = Http::asForm()->post('https://oauth2.googleapis.com/token', [
