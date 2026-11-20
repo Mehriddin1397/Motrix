@@ -14,6 +14,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Modules\Video\Models\Video;
+use Modules\Video\Models\VideoCategory;
 
 class PublishVideoToSocialMediaJob implements ShouldQueue
 {
@@ -42,10 +44,44 @@ class PublishVideoToSocialMediaJob implements ShouldQueue
             return;
         }
 
+        if (! $post->video_path || ! Storage::disk('public')->exists($post->video_path)) {
+            Log::warning("PublishVideoToSocialMediaJob: VideoPost {$this->videoPostId} uchun video fayl topilmadi.");
+            return;
+        }
+
         $videoFullPath = Storage::disk('public')->path($post->video_path);
         $errors = [];
 
-        // 1. Telegram
+        // 1. YouTube (Birinchi navbatda: muvaffaqiyatli bo'lsa, YouTube linki boshqa tarmoqlarga ham uzatiladi)
+        if ($post->send_to_youtube && $post->youtube_status !== 'success') {
+            try {
+                $post->update(['youtube_status' => 'processing']);
+                $result = $youtube->send($post, $videoFullPath);
+                $youtubeVideoId = $result['video_id'] ?? null;
+
+                $post->update([
+                    'youtube_status' => 'success',
+                    'youtube_video_id' => $youtubeVideoId,
+                ]);
+
+                // Saytning asosiy "Videolar" katalogiga YouTube pleyeri orqali avtomatik joylash
+                if ($youtubeVideoId) {
+                    $this->syncToWebsiteCatalog($post, $youtubeVideoId);
+                }
+            } catch (\Throwable $e) {
+                $msg = "YouTube xatosi: " . $e->getMessage();
+                $errors[] = $msg;
+                Log::error($msg);
+                $post->update(['youtube_status' => 'failed']);
+            }
+        } elseif (! $post->send_to_youtube) {
+            $post->update(['youtube_status' => 'skipped']);
+        }
+
+        // Modelni yangilab olamiz (YouTube ID paydo bo'lgan bo'lsa Telegram captionga tushishi uchun)
+        $post->refresh();
+
+        // 2. Telegram
         if ($post->send_to_telegram && $post->telegram_status !== 'success') {
             try {
                 $post->update(['telegram_status' => 'processing']);
@@ -64,7 +100,7 @@ class PublishVideoToSocialMediaJob implements ShouldQueue
             $post->update(['telegram_status' => 'skipped']);
         }
 
-        // 2. Facebook
+        // 3. Facebook
         if ($post->send_to_facebook && $post->facebook_status !== 'success') {
             try {
                 $post->update(['facebook_status' => 'processing']);
@@ -83,7 +119,7 @@ class PublishVideoToSocialMediaJob implements ShouldQueue
             $post->update(['facebook_status' => 'skipped']);
         }
 
-        // 3. Instagram
+        // 4. Instagram
         if ($post->send_to_instagram && $post->instagram_status !== 'success') {
             try {
                 $post->update(['instagram_status' => 'processing']);
@@ -102,30 +138,37 @@ class PublishVideoToSocialMediaJob implements ShouldQueue
             $post->update(['instagram_status' => 'skipped']);
         }
 
-        // 4. YouTube
-        if ($post->send_to_youtube && $post->youtube_status !== 'success') {
-            try {
-                $post->update(['youtube_status' => 'processing']);
-                $result = $youtube->send($post, $videoFullPath);
-                $post->update([
-                    'youtube_status' => 'success',
-                    'youtube_video_id' => $result['video_id'] ?? null,
-                ]);
-            } catch (\Throwable $e) {
-                $msg = "YouTube xatosi: " . $e->getMessage();
-                $errors[] = $msg;
-                Log::error($msg);
-                $post->update(['youtube_status' => 'failed']);
-            }
-        } elseif (! $post->send_to_youtube) {
-            $post->update(['youtube_status' => 'skipped']);
-        }
-
         if (! empty($errors)) {
             $existingLog = $post->error_log ? $post->error_log . "\n---\n" : '';
             $post->update([
                 'error_log' => $existingLog . implode("\n", $errors) . " [" . now()->toDateTimeString() . "]",
             ]);
+        }
+    }
+
+    /**
+     * Videoni Motrix saytining asosiy "Videolar" bo'limiga YouTube linki bilan avtomatik qo'shish.
+     * Bu foydalanuvchilar videoni serverdan emas, YouTube pleyeri orqali tez va serverga yuklamasiz ko'rishini ta'minlaydi.
+     */
+    protected function syncToWebsiteCatalog(VideoPost $post, string $youtubeVideoId): void
+    {
+        try {
+            $category = VideoCategory::first();
+            $youtubeUrl = "https://www.youtube.com/watch?v={$youtubeVideoId}";
+
+            Video::firstOrCreate(
+                ['slug' => $post->slug],
+                [
+                    'category_id' => $category?->id ?? 1,
+                    'title' => $post->title,
+                    'url_or_path' => $youtubeUrl,
+                    'published_at' => now(),
+                ]
+            );
+
+            Log::info("PublishVideoToSocialMediaJob: Video '{$post->title}' asosiy sayt katalogiga YouTube linki bilan qo'shildi.");
+        } catch (\Throwable $e) {
+            Log::warning("PublishVideoToSocialMediaJob: Asosiy sayt katalogiga qo'shishda xatolik: " . $e->getMessage());
         }
     }
 }

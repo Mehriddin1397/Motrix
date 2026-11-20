@@ -72,4 +72,12 @@ return [
         'refresh_token' => env('GOOGLE_YOUTUBE_REFRESH_TOKEN'),
     ],
 
+    'social_links' => [
+        'site' => env('APP_URL', 'https://motrix.uz'),
+        'telegram' => env('SOCIAL_TELEGRAM_URL', 'https://t.me/Motrixuz'),
+        'instagram' => env('SOCIAL_INSTAGRAM_URL', 'https://instagram.com/motrixuz'),
+        'youtube' => env('SOCIAL_YOUTUBE_URL', 'https://youtube.com/@Motrixuz'),
+        'facebook' => env('SOCIAL_FACEBOOK_URL', 'https://facebook.com/motrixuz'),
+    ],
+
 ];

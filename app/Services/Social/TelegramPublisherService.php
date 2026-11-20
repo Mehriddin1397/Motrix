@@ -141,13 +141,29 @@ class TelegramPublisherService
             $caption .= "{$desc}\n\n";
         }
 
-        $caption .= "🌐 <a href=\"{$post->public_url}\">Motrix.uz da ko'rish</a>";
+        // Ijtimoiy tarmoqlar va havolalar bloki
+        $siteUrl = $post->public_url;
+        $ytUrl = $post->youtube_video_id
+            ? "https://youtu.be/{$post->youtube_video_id}"
+            : config('services.social_links.youtube', 'https://youtube.com/@Motrixuz');
+        $instaUrl = config('services.social_links.instagram', 'https://instagram.com/motrixuz');
+        $tgUrl = config('services.social_links.telegram', 'https://t.me/Motrixuz');
 
-        if (mb_strlen($caption) > 1020) {
-            $allowedLength = 1010 - mb_strlen("...\n\n🌐 <a href=\"{$post->public_url}\">Motrix.uz da ko'rish</a>");
-            $caption = mb_substr($caption, 0, max(100, $allowedLength)) . "...\n\n🌐 <a href=\"{$post->public_url}\">Motrix.uz da ko'rish</a>";
+        $footer = "🌐 <b>Bizning rasmiy sahifalarimiz:</b>\n"
+            . "🔹 Sayt: <a href=\"{$siteUrl}\">motrix.uz</a>\n"
+            . "🔹 YouTube: <a href=\"{$ytUrl}\">YouTube kanalimiz</a>\n"
+            . "🔹 Instagram: <a href=\"{$instaUrl}\">Instagram</a>\n"
+            . "🔹 Telegram: <a href=\"{$tgUrl}\">@Motrixuz</a>";
+
+        $fullCaption = $caption . $footer;
+
+        if (mb_strlen($fullCaption) > 1020) {
+            $cleanDesc = htmlspecialchars($post->description ?? '', ENT_QUOTES, 'UTF-8');
+            $allowedDescLength = 1010 - mb_strlen("🎬 <b>{$title}</b>\n\n...\n\n" . $footer);
+            $truncatedDesc = mb_substr($cleanDesc, 0, max(50, $allowedDescLength)) . "...";
+            $fullCaption = "🎬 <b>{$title}</b>\n\n{$truncatedDesc}\n\n" . $footer;
         }
 
-        return $caption;
+        return $fullCaption;
     }
 }

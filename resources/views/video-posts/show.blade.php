@@ -14,11 +14,15 @@
     <div class="max-w-5xl mx-auto px-4 py-3">
         {{-- Video Player Container --}}
         <div class="relative aspect-video w-full bg-black overflow-hidden shadow-lg rounded-2xl">
-            @if($post->video_url)
+            @if($post->youtube_video_id)
+                <iframe src="https://www.youtube.com/embed/{{ $post->youtube_video_id }}?autoplay=0" class="h-full w-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            @elseif($post->video_url)
                 <video src="{{ $post->video_url }}" controls poster="{{ $post->thumbnail_url }}" class="h-full w-full object-contain" playsinline preload="metadata"></video>
             @else
-                <div class="flex h-full w-full items-center justify-center text-zinc-500">
-                    Video fayli topilmadi
+                <div class="flex h-full w-full flex-col items-center justify-center text-zinc-500 p-6 text-center">
+                    <span class="text-3xl mb-2">🎬</span>
+                    <p class="text-sm font-semibold">Video ijtimoiy tarmoqlarga yuborilgan</p>
+                    <p class="text-xs text-zinc-600 mt-1">Server xotirasini tejash maqsadida og'ir video fayllar serverda saqlanmaydi.</p>
                 </div>
             @endif
         </div>
@@ -65,6 +69,24 @@
                 >
                     <span>Facebook</span>
                 </a>
+            </div>
+
+            {{-- Official Social Media Channels --}}
+            <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/60 mt-3">
+                <div class="text-xs font-bold text-zinc-600 dark:text-zinc-400 mb-2">
+                    Bizning rasmiy sahifalarimiz:
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <a href="https://t.me/Motrixuz" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-semibold hover:bg-sky-500/20 transition">
+                        <span>Telegram: @Motrixuz</span>
+                    </a>
+                    <a href="https://youtube.com/@Motrixuz" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-semibold hover:bg-red-500/20 transition">
+                        <span>YouTube: @Motrixuz</span>
+                    </a>
+                    <a href="https://instagram.com/motrixuz" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400 text-xs font-semibold hover:bg-pink-500/20 transition">
+                        <span>Instagram: motrixuz</span>
+                    </a>
+                </div>
             </div>
 
             {{-- Related Videos --}}
