@@ -67,8 +67,8 @@ return [
     ],
 
     'youtube' => [
-        'client_id' => env('GOOGLE_CLIENT_ID'),
-        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'client_id' => env('YOUTUBE_CLIENT_ID', env('GOOGLE_CLIENT_ID')),
+        'client_secret' => env('YOUTUBE_CLIENT_SECRET', env('GOOGLE_CLIENT_SECRET')),
         'refresh_token' => env('GOOGLE_YOUTUBE_REFRESH_TOKEN'),
     ],
 
