@@ -25,6 +25,7 @@ class TelegramPublisherService
 
     /**
      * Send video to Telegram channel or group.
+     * Automatically compresses video using ffmpeg if it exceeds Telegram's 50MB limit.
      *
      * @param VideoPost $post
      * @param string $videoFullPath
@@ -41,23 +42,54 @@ class TelegramPublisherService
             throw new RuntimeException("Video fayli serverda topilmadi: {$videoFullPath}");
         }
 
+        $targetVideoPath = $videoFullPath;
+        $tempCompressedFile = null;
         $fileSize = filesize($videoFullPath);
-        // Telegram Bot API limit: 50MB
-        if ($fileSize > 50 * 1024 * 1024) {
-            throw new RuntimeException("Telegram Bot API orqali faqat 50MB gacha video yuborish mumkin. Video hajmi: " . round($fileSize / (1024 * 1024), 2) . " MB.");
+
+        // Telegram Bot API limit: 50MB. If file is > 48MB, compress with ffmpeg.
+        if ($fileSize > 48 * 1024 * 1024) {
+            $tempCompressedFile = '/tmp/tg_comp_' . uniqid() . '.mp4';
+            Log::info("Telegram video hajmi (" . round($fileSize / (1024 * 1024), 2) . " MB) 50MB dan katta. ffmpeg orqali siqilmoqda...");
+
+            $cmd = sprintf(
+                'ffmpeg -i %s -vcodec libx264 -crf 28 -preset veryfast -acodec aac -b:a 128k -movflags +faststart %s -y 2>&1',
+                escapeshellarg($videoFullPath),
+                escapeshellarg($tempCompressedFile)
+            );
+
+            exec($cmd, $output, $returnCode);
+
+            if ($returnCode === 0 && file_exists($tempCompressedFile) && filesize($tempCompressedFile) > 0) {
+                $targetVideoPath = $tempCompressedFile;
+                $newSize = filesize($tempCompressedFile);
+                Log::info("ffmpeg orqali video muvaffaqiyatli siqildi: " . round($newSize / (1024 * 1024), 2) . " MB");
+            } else {
+                Log::warning("ffmpeg siqishda muammo: " . implode("\n", array_slice($output, -10)));
+            }
+        }
+
+        $finalSize = filesize($targetVideoPath);
+        if ($finalSize > 50 * 1024 * 1024) {
+            if ($tempCompressedFile && file_exists($tempCompressedFile)) {
+                @unlink($tempCompressedFile);
+            }
+            throw new RuntimeException("Telegram Bot API orqali faqat 50MB gacha video yuborish mumkin. Hatto siqilgandan keyin ham video hajmi: " . round($finalSize / (1024 * 1024), 2) . " MB bo'ldi.");
         }
 
         $caption = $this->buildCaption($post);
         $url = "https://api.telegram.org/bot{$this->botToken}/sendVideo";
 
-        $fileStream = fopen($videoFullPath, 'r');
+        $fileStream = fopen($targetVideoPath, 'r');
         if (! $fileStream) {
+            if ($tempCompressedFile && file_exists($tempCompressedFile)) {
+                @unlink($tempCompressedFile);
+            }
             throw new RuntimeException("Video faylini o'qib bo'lmadi.");
         }
 
         try {
             $response = Http::timeout(300)
-                ->attach('video', $fileStream, basename($videoFullPath))
+                ->attach('video', $fileStream, basename($targetVideoPath))
                 ->post($url, [
                     'chat_id' => $this->chatId,
                     'caption' => $caption,
@@ -89,6 +121,10 @@ class TelegramPublisherService
                 fclose($fileStream);
             }
             throw $e;
+        } finally {
+            if ($tempCompressedFile && file_exists($tempCompressedFile)) {
+                @unlink($tempCompressedFile);
+            }
         }
     }
 

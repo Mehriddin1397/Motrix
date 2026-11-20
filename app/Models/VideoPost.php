@@ -76,6 +76,6 @@ class VideoPost extends Model
 
     public function getPublicUrlAttribute(): string
     {
-        return url('/video-posts/' . $this->slug);
+        return 'https://motrix.uz/video-posts/' . $this->slug;
     }
 }
