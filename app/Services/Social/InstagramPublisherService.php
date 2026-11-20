@@ -14,8 +14,8 @@ class InstagramPublisherService
 
     public function __construct()
     {
-        $this->accessToken = config('services.meta.page_access_token');
-        $this->instagramAccountId = config('services.meta.instagram_account_id');
+        $this->accessToken = config('services.meta.page_access_token') ?: \App\Models\Setting::get('meta_page_access_token');
+        $this->instagramAccountId = config('services.meta.instagram_account_id') ?: \App\Models\Setting::get('instagram_account_id');
     }
 
     public function isConfigured(): bool

@@ -14,8 +14,8 @@ class FacebookPublisherService
 
     public function __construct()
     {
-        $this->accessToken = config('services.meta.page_access_token');
-        $this->pageId = config('services.meta.facebook_page_id');
+        $this->accessToken = config('services.meta.page_access_token') ?: \App\Models\Setting::get('meta_page_access_token');
+        $this->pageId = config('services.meta.facebook_page_id') ?: \App\Models\Setting::get('facebook_page_id');
     }
 
     public function isConfigured(): bool

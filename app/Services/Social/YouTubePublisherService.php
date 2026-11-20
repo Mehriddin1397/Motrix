@@ -15,9 +15,9 @@ class YouTubePublisherService
 
     public function __construct()
     {
-        $this->clientId = config('services.youtube.client_id');
-        $this->clientSecret = config('services.youtube.client_secret');
-        $this->refreshToken = config('services.youtube.refresh_token');
+        $this->clientId = config('services.youtube.client_id') ?: config('services.google.client_id');
+        $this->clientSecret = config('services.youtube.client_secret') ?: config('services.google.client_secret');
+        $this->refreshToken = config('services.youtube.refresh_token') ?: \App\Models\Setting::get('youtube_refresh_token');
     }
 
     public function isConfigured(): bool

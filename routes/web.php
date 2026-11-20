@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\YouTubeOAuthController;
 use App\Http\Controllers\AdPromotionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocationController;
@@ -55,6 +56,12 @@ Route::get('/quiz/{quiz:slug}/leaderboard', [QuizController::class, 'leaderboard
 // Video Postlar (Ijtimoiy tarmoqlar va sayt videolari)
 Route::get('/video-posts', [VideoPostController::class, 'index'])->name('video-posts.index');
 Route::get('/video-posts/{slug}', [VideoPostController::class, 'show'])->name('video-posts.show');
+
+// YouTube Data API OAuth ulanishi
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/youtube/auth', [YouTubeOAuthController::class, 'redirect'])->name('admin.youtube.auth');
+    Route::get('/admin/youtube/callback', [YouTubeOAuthController::class, 'callback'])->name('admin.youtube.callback');
+});
 
 Route::get('/dashboard', function () {
     $user = auth()->user();
