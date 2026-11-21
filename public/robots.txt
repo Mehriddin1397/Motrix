@@ -12,11 +12,8 @@ Disallow: /market/conversations/*
 Disallow: /parts/create
 Disallow: /parts/*/edit
 Disallow: /promotions
-Disallow: /login
-Disallow: /register
-Disallow: /forgot-password
-Disallow: /reset-password
 Disallow: /livewire/*
+Disallow: /test-*
 
 Sitemap: https://motrix.uz/sitemap.xml
-Host: https://motrix.uz
+Host: motrix.uz

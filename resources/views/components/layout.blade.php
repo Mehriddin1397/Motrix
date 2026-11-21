@@ -31,7 +31,8 @@
         $canonicalBase = 'https://motrix.uz';
     }
     $currentPath = request()->path() === '/' ? '' : '/' . ltrim(request()->path(), '/');
-    $canonicalUrl = $canonical ?: ($canonicalBase . $currentPath);
+    $pageParam = (request()->has('page') && (int) request('page') > 1) ? '?page=' . (int) request('page') : '';
+    $canonicalUrl = $canonical ?: ($canonicalBase . $currentPath . $pageParam);
 
     $defaultImage = $canonicalBase . '/images/logo-full-black.png';
     $ogImage = $image ?: $defaultImage;
@@ -64,7 +65,7 @@
         <meta name="author" content="Motrix.uz">
         @if($noindex)
             <meta name="robots" content="noindex, nofollow">
-        @elseif(request()->hasAny(['displacement', 'powertrain', 'sort', 'beginner', 'q']))
+        @elseif(request()->hasAny(['displacement', 'powertrain', 'sort', 'beginner', 'q', 'prompt', 'motorcycle', 'seller_type']))
             <meta name="robots" content="noindex, follow">
         @else
             <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">

@@ -39,10 +39,16 @@ Route::get('/shops/{shop}', [ShopController::class, 'show'])->name('shops.show')
 
 // Vaqtinchalik xodim profili (test sahifalari)
 Route::get('/test-profile', function () {
-    return response()->file(public_path('test/index.php'), ['Content-Type' => 'text/html; charset=UTF-8']);
+    return response()->file(public_path('test/index.php'), [
+        'Content-Type' => 'text/html; charset=UTF-8',
+        'X-Robots-Tag' => 'noindex, nofollow',
+    ]);
 });
 Route::get('/test-abdujalilova', function () {
-    return response()->file(public_path('test/abdujalilova.php'), ['Content-Type' => 'text/html; charset=UTF-8']);
+    return response()->file(public_path('test/abdujalilova.php'), [
+        'Content-Type' => 'text/html; charset=UTF-8',
+        'X-Robots-Tag' => 'noindex, nofollow',
+    ]);
 });
 
 // Motrix Quiz routes (Haftalik viktorina tizimi)
