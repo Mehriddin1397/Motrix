@@ -38,6 +38,13 @@ class InstagramPublisherService
         }
 
         $videoUrl = $post->video_url;
+        if ($videoUrl && ! str_starts_with($videoUrl, 'http')) {
+            $videoUrl = rtrim(config('app.canonical_url') ?: config('app.url') ?: 'https://motrix.uz', '/') . '/' . ltrim($videoUrl, '/');
+        } elseif ($videoUrl && (str_contains($videoUrl, '192.168.') || str_contains($videoUrl, '127.0.0.1') || str_contains($videoUrl, 'localhost'))) {
+            $parsed = parse_url($videoUrl);
+            $videoUrl = 'https://motrix.uz' . ($parsed['path'] ?? '');
+        }
+
         if (! $videoUrl || ! filter_var($videoUrl, FILTER_VALIDATE_URL)) {
             throw new RuntimeException("Instagram Reels uchun ochiq video URL manzili topilmadi.");
         }
@@ -48,7 +55,7 @@ class InstagramPublisherService
         }
 
         // 1-qadam: Reels Media Container yaratish
-        $createUrl = "https://graph.facebook.com/v19.0/{$this->instagramAccountId}/media";
+        $createUrl = "https://graph.facebook.com/v21.0/{$this->instagramAccountId}/media";
         $createResponse = Http::timeout(60)->post($createUrl, [
             'media_type' => 'REELS',
             'video_url' => $videoUrl,
@@ -68,9 +75,9 @@ class InstagramPublisherService
         }
 
         // 2-qadam: Meta serverlari videoni yuklab olib qayta ishlashini kutish (polling)
-        $statusUrl = "https://graph.facebook.com/v19.0/{$creationId}";
+        $statusUrl = "https://graph.facebook.com/v21.0/{$creationId}";
         $isReady = false;
-        $maxAttempts = 12; // 12 x 5 soniya = 60 soniya
+        $maxAttempts = 24; // 24 x 5 soniya = 120 soniya
 
         for ($i = 0; $i < $maxAttempts; $i++) {
             sleep(5);
@@ -86,7 +93,8 @@ class InstagramPublisherService
             }
 
             if ($statusCode === 'ERROR') {
-                throw new RuntimeException("Instagram video ishlovida xatolik yuz berdi (Status: ERROR).");
+                $errDetail = $checkResponse->json('error_message') ?? $checkResponse->json('status') ?? 'Status: ERROR';
+                throw new RuntimeException("Instagram video ishlovida xatolik yuz berdi ({$errDetail}).");
             }
         }
 
@@ -95,7 +103,7 @@ class InstagramPublisherService
         }
 
         // 3-qadam: Postni e'lon qilish (Publish)
-        $publishUrl = "https://graph.facebook.com/v19.0/{$this->instagramAccountId}/media_publish";
+        $publishUrl = "https://graph.facebook.com/v21.0/{$this->instagramAccountId}/media_publish";
         $publishResponse = Http::timeout(60)->post($publishUrl, [
             'creation_id' => $creationId,
             'access_token' => $this->accessToken,
