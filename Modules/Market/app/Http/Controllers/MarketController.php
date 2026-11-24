@@ -7,6 +7,7 @@ use App\Models\City;
 use Illuminate\Http\Request;
 use Modules\Brand\Models\Brand;
 use Modules\Market\Models\Listing;
+use Modules\Market\Services\MotorcycleRecognitionService;
 use Modules\Motorcycle\Models\Motorcycle;
 
 class MarketController extends Controller
@@ -139,6 +140,25 @@ class MarketController extends Controller
         return redirect()
             ->route('profile.edit')
             ->with('status', "E'lon o'chirildi.");
+    }
+
+    public function aiIdentify(Request $request, MotorcycleRecognitionService $service)
+    {
+        $request->validate([
+            'image' => ['required', 'image', 'max:12288'],
+        ], [
+            'image.required' => "Iltimos, mototsikl rasmini yuklang.",
+            'image.image' => "Yuklangan fayl rasm bo'lishi kerak.",
+            'image.max' => "Rasm hajmi 12 MB dan oshmasligi kerak.",
+        ]);
+
+        $result = $service->recognize($request->file('image'));
+
+        if (! empty($result['success'])) {
+            return response()->json($result);
+        }
+
+        return response()->json($result, 422);
     }
 
     private function validated(Request $request): array

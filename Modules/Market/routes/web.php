@@ -11,6 +11,10 @@ Route::get('market', [MarketController::class, 'index'])->name('market.index');
 // matches the wildcard first and treats "create"/"conversations" as the
 // {market} route parameter, causing a spurious 404 (model not found).
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('market/ai-identify', [MarketController::class, 'aiIdentify'])
+        ->middleware('throttle:30,1')
+        ->name('market.ai-identify');
+
     Route::middleware('permission:listings.create')->group(function () {
         Route::get('market/create', [MarketController::class, 'create'])->name('market.create');
         Route::post('market', [MarketController::class, 'store'])->name('market.store');

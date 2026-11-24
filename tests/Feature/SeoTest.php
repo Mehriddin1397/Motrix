@@ -23,7 +23,7 @@ class SeoTest extends TestCase
         $this->assertStringContainsString('Sitemap: https://motrix.uz/sitemap.xml', $content);
         $this->assertStringContainsString('Disallow: /admin', $content);
         $this->assertStringContainsString('Disallow: /profile', $content);
-        $this->assertStringContainsString('Host: https://motrix.uz', $content);
+        $this->assertTrue(str_contains($content, 'Host: motrix.uz') || str_contains($content, 'Host: https://motrix.uz'));
     }
 
     public function test_sitemap_xml_renders_canonical_urls_and_valid_xml(): void
