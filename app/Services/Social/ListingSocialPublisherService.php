@@ -306,6 +306,10 @@ class ListingSocialPublisherService
             }
         }
 
+        if ($results['telegram_channel'] || $results['telegram_group']) {
+            $listing->update(['telegram_status' => 'sold']);
+        }
+
         // Instagram: sotilgan postni o'chirish (Instagram feed toza turishi uchun)
         if ($this->isInstagramConfigured() && $listing->instagram_media_id) {
             try {
@@ -314,6 +318,12 @@ class ListingSocialPublisherService
                     'access_token' => $this->instagramAccessToken,
                 ]);
                 $results['instagram'] = $resp->successful();
+                if ($resp->successful()) {
+                    $listing->update(['instagram_status' => 'deleted']);
+                } else {
+                    $err = $resp->json('error.message') ?? $resp->body();
+                    Log::warning("Instagram postni o'chirishda Meta xatosi: " . $err);
+                }
             } catch (\Throwable $e) {
                 Log::warning("Instagram postni o'chirishda xatolik: " . $e->getMessage());
             }

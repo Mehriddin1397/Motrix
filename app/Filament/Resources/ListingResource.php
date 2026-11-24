@@ -181,26 +181,30 @@ class ListingResource extends Resource
                     ->label('Telegram')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'published' => 'Yuborilgan',
+                        'sold' => 'Sotildi',
                         'failed' => 'Xatolik',
                         default => 'Yuborilmagan',
                     })
                     ->colors([
                         'success' => 'published',
+                        'info' => 'sold',
                         'danger' => 'failed',
-                        'gray' => fn ($state) => $state !== 'published' && $state !== 'failed',
+                        'gray' => fn ($state) => ! in_array($state, ['published', 'sold', 'failed']),
                     ])
                     ->toggleable(),
                 Tables\Columns\BadgeColumn::make('instagram_status')
                     ->label('Instagram')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'published' => 'Yuborilgan',
+                        'deleted' => 'O\'chirilgan',
                         'failed' => 'Xatolik',
                         default => 'Yuborilmagan',
                     })
                     ->colors([
                         'success' => 'published',
+                        'warning' => 'deleted',
                         'danger' => 'failed',
-                        'gray' => fn ($state) => $state !== 'published' && $state !== 'failed',
+                        'gray' => fn ($state) => ! in_array($state, ['published', 'deleted', 'failed']),
                     ])
                     ->toggleable(),
                 Tables\Columns\IconColumn::make('is_featured')
@@ -298,22 +302,25 @@ class ListingResource extends Resource
                     ->visible(fn (Listing $record) => $record->status !== 'sold')
                     ->requiresConfirmation()
                     ->modalHeading('E\'lonni sotildi deb belgilash')
-                    ->modalDescription('Ushbu mototsikl sotilganini tasdiqlaysizmi? Telegramdagi post sarlavhasi avtomatik tarzda "❌ SOTILDI" ga o\'zgartiriladi va sotuvchi telefoni yashiriladi.')
+                    ->modalDescription('Ushbu mototsikl sotilganini tasdiqlaysizmi? Telegramdagi post sarlavhasi avtomatik tarzda "❌ SOTILDI" ga o\'zgartiriladi va Instagramdagi post o\'chiriladi.')
                     ->action(function (Listing $record) {
                         $record->update(['status' => 'sold']);
                         $publisher = app(ListingSocialPublisherService::class);
                         $res = $publisher->markAsSoldOnSocialMedia($record);
 
-                        $body = 'Telegram kanal va guruhdagi post "❌ SOTILDI" deb yangilandi va sotuvchi raqami yashirildi.';
+                        $messages = [];
+                        if (! empty($res['telegram_channel']) || ! empty($res['telegram_group'])) {
+                            $messages[] = 'Telegram kanal va guruhdagi post "❌ SOTILDI" deb yangilandi va sotuvchi raqami yashirildi.';
+                        }
                         if (! empty($res['instagram'])) {
-                            $body .= "\nInstagramdagi post ham avtomatik o'chirildi.";
+                            $messages[] = "Instagramdagi post ham avtomatik o'chirildi.";
                         } elseif ($record->instagram_media_id) {
-                            $body .= "\nEslatma: Instagramdagi postni ilova ichidan (3 nuqta -> O'chirish) o'chirib qo'yishingiz mumkin.";
+                            $messages[] = "Eslatma: Instagram postini o'chirish uchun API ruxsati (instagram_manage_contents) kutilmoqda.";
                         }
 
                         Notification::make()
                             ->title('E\'lon sotildi deb belgilandi!')
-                            ->body($body)
+                            ->body(implode("\n", $messages))
                             ->success()
                             ->send();
                     }),
