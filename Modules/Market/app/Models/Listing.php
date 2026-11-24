@@ -37,6 +37,12 @@ class Listing extends Model implements HasMedia
         'promotion_tier',
         'promoted_until',
         'published_at',
+        'telegram_channel_message_id',
+        'telegram_group_message_id',
+        'instagram_media_id',
+        'telegram_status',
+        'instagram_status',
+        'social_published_at',
     ];
 
     protected function casts(): array
@@ -46,7 +52,26 @@ class Listing extends Model implements HasMedia
             'is_featured' => 'boolean',
             'promoted_until' => 'datetime',
             'published_at' => 'datetime',
+            'social_published_at' => 'datetime',
         ];
+    }
+
+    public function getDisplayTitleAttribute(): string
+    {
+        if ($this->custom_title) {
+            return $this->custom_title;
+        }
+
+        $brandName = $this->brand?->name;
+        $motoName = $this->motorcycle?->name;
+
+        if ($brandName && $motoName) {
+            return str_starts_with(strtolower($motoName), strtolower($brandName))
+                ? $motoName
+                : "{$brandName} {$motoName}";
+        }
+
+        return $motoName ?: $brandName ?: 'Mototsikl';
     }
 
     public function registerMediaCollections(): void

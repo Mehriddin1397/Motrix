@@ -6,6 +6,8 @@ use App\Filament\Resources\ListingResource\Pages;
 use App\Filament\Resources\ListingResource\RelationManagers;
 use App\Models\City;
 use App\Models\Country;
+use App\Services\Social\ListingSocialPublisherService;
+use Filament\Notifications\Notification;
 use Modules\Market\Models\Listing;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -175,6 +177,32 @@ class ListingResource extends Resource
                         'danger' => 'rejected',
                         'warning' => 'expired',
                     ]),
+                Tables\Columns\BadgeColumn::make('telegram_status')
+                    ->label('Telegram')
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'published' => 'Yuborilgan',
+                        'failed' => 'Xatolik',
+                        default => 'Yuborilmagan',
+                    })
+                    ->colors([
+                        'success' => 'published',
+                        'danger' => 'failed',
+                        'gray' => fn ($state) => $state !== 'published' && $state !== 'failed',
+                    ])
+                    ->toggleable(),
+                Tables\Columns\BadgeColumn::make('instagram_status')
+                    ->label('Instagram')
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'published' => 'Yuborilgan',
+                        'failed' => 'Xatolik',
+                        default => 'Yuborilmagan',
+                    })
+                    ->colors([
+                        'success' => 'published',
+                        'danger' => 'failed',
+                        'gray' => fn ($state) => $state !== 'published' && $state !== 'failed',
+                    ])
+                    ->toggleable(),
                 Tables\Columns\IconColumn::make('is_featured')
                     ->label('Tavsiya etilgan')
                     ->boolean(),
@@ -210,6 +238,79 @@ class ListingResource extends Resource
                     ]),
             ])
             ->actions([
+                Tables\Actions\Action::make('publish_social')
+                    ->label('Tarmoqlarga')
+                    ->icon('heroicon-o-share')
+                    ->color('primary')
+                    ->form([
+                        Forms\Components\Checkbox::make('send_telegram')
+                            ->label('Telegram (@Motrixuz kanal va @Motrix_uz guruh)')
+                            ->default(true),
+                        Forms\Components\Checkbox::make('send_instagram')
+                            ->label('Instagram (@motrix.uz)')
+                            ->default(true),
+                    ])
+                    ->action(function (Listing $record, array $data) {
+                        $publisher = app(ListingSocialPublisherService::class);
+                        $messages = [];
+
+                        if (! empty($data['send_telegram'])) {
+                            try {
+                                $publisher->publishToTelegram($record);
+                                $messages[] = 'Telegram kanal va guruhga muvaffaqiyatli yuborildi!';
+                            } catch (\Throwable $e) {
+                                $record->update(['telegram_status' => 'failed']);
+                                Notification::make()
+                                    ->title('Telegram xatosi')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+                            }
+                        }
+
+                        if (! empty($data['send_instagram'])) {
+                            try {
+                                $publisher->publishToInstagram($record);
+                                $messages[] = 'Instagram sahifasiga muvaffaqiyatli post qilindi!';
+                            } catch (\Throwable $e) {
+                                $record->update(['instagram_status' => 'failed']);
+                                Notification::make()
+                                    ->title('Instagram xatosi')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+                            }
+                        }
+
+                        if (! empty($messages)) {
+                            Notification::make()
+                                ->title('E\'lon tarqatildi!')
+                                ->body(implode("\n", $messages))
+                                ->success()
+                                ->send();
+                        }
+                    }),
+
+                Tables\Actions\Action::make('mark_sold')
+                    ->label('Sotildi')
+                    ->icon('heroicon-o-check-badge')
+                    ->color('success')
+                    ->visible(fn (Listing $record) => $record->status !== 'sold')
+                    ->requiresConfirmation()
+                    ->modalHeading('E\'lonni sotildi deb belgilash')
+                    ->modalDescription('Ushbu mototsikl sotilganini tasdiqlaysizmi? Telegramdagi post sarlavhasi avtomatik tarzda "❌ SOTILDI" ga o\'zgartiriladi va sotuvchi telefoni yashiriladi.')
+                    ->action(function (Listing $record) {
+                        $record->update(['status' => 'sold']);
+                        $publisher = app(ListingSocialPublisherService::class);
+                        $publisher->markAsSoldOnSocialMedia($record);
+
+                        Notification::make()
+                            ->title('E\'lon sotildi deb belgilandi!')
+                            ->body('Ijtimoiy tarmoqlardagi postlar yangilandi va sotuvchi raqami yashirildi.')
+                            ->success()
+                            ->send();
+                    }),
+
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
