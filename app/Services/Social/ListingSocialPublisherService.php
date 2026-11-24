@@ -137,7 +137,9 @@ class ListingSocialPublisherService
 
         $imageUrl = $firstMedia->getFullUrl();
         // Tashqi ochiq domen bo'lishini ta'minlash
-        if ($imageUrl && (str_contains($imageUrl, '192.168.') || str_contains($imageUrl, '127.0.0.1') || str_contains($imageUrl, 'localhost'))) {
+        if ($imageUrl && ! str_starts_with($imageUrl, 'http')) {
+            $imageUrl = 'https://motrix.uz/' . ltrim($imageUrl, '/');
+        } elseif ($imageUrl && (str_contains($imageUrl, '192.168.') || str_contains($imageUrl, '127.0.0.1') || str_contains($imageUrl, 'localhost'))) {
             $parsed = parse_url($imageUrl);
             $imageUrl = 'https://motrix.uz' . ($parsed['path'] ?? '');
         }
@@ -163,7 +165,24 @@ class ListingSocialPublisherService
             throw new RuntimeException("Instagram konteyner ID olinmadi.");
         }
 
-        // 2-qadam: Postni e'lon qilish (Publish)
+        // 2-qadam: Meta serverlari rasmni yuklab olishini kutish (polling)
+        $statusUrl = "https://graph.facebook.com/v21.0/{$creationId}";
+        for ($i = 0; $i < 6; $i++) {
+            sleep(3);
+            $checkResponse = Http::timeout(15)->get($statusUrl, [
+                'fields' => 'status_code',
+                'access_token' => $this->instagramAccessToken,
+            ]);
+            $statusCode = $checkResponse->json('status_code');
+            if ($statusCode === 'FINISHED' || $statusCode === 'READY') {
+                break;
+            }
+            if ($statusCode === 'ERROR') {
+                break;
+            }
+        }
+
+        // 3-qadam: Postni e'lon qilish (Publish)
         $publishUrl = "https://graph.facebook.com/v21.0/{$this->instagramAccountId}/media_publish";
         $publishResponse = Http::timeout(60)->post($publishUrl, [
             'creation_id' => $creationId,
