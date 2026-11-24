@@ -302,11 +302,18 @@ class ListingResource extends Resource
                     ->action(function (Listing $record) {
                         $record->update(['status' => 'sold']);
                         $publisher = app(ListingSocialPublisherService::class);
-                        $publisher->markAsSoldOnSocialMedia($record);
+                        $res = $publisher->markAsSoldOnSocialMedia($record);
+
+                        $body = 'Telegram kanal va guruhdagi post "❌ SOTILDI" deb yangilandi va sotuvchi raqami yashirildi.';
+                        if (! empty($res['instagram'])) {
+                            $body .= "\nInstagramdagi post ham avtomatik o'chirildi.";
+                        } elseif ($record->instagram_media_id) {
+                            $body .= "\nEslatma: Instagramdagi postni ilova ichidan (3 nuqta -> O'chirish) o'chirib qo'yishingiz mumkin.";
+                        }
 
                         Notification::make()
                             ->title('E\'lon sotildi deb belgilandi!')
-                            ->body('Ijtimoiy tarmoqlardagi postlar yangilandi va sotuvchi raqami yashirildi.')
+                            ->body($body)
                             ->success()
                             ->send();
                     }),

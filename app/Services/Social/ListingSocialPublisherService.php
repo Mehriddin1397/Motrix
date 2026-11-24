@@ -86,13 +86,12 @@ class ListingSocialPublisherService
         // 2. Telegram Guruhga yuborish (agar guruh sozlangan bo'lsa)
         if ($this->groupChatId) {
             try {
-                if ($firstFileId) {
-                    $groupResp = Http::timeout(30)->post("https://api.telegram.org/bot{$this->botToken}/sendPhoto", [
-                        'chat_id' => $this->groupChatId,
-                        'photo' => $firstFileId,
-                        'caption' => $caption,
-                        'parse_mode' => 'HTML',
-                    ]);
+                if (count($photoPaths) > 1) {
+                    $groupResp = $this->sendTelegramMediaGroup($this->groupChatId, $photoPaths, $caption);
+                    $groupResults = $groupResp->json('result');
+                    $groupMsgId = $groupResults[0]['message_id'] ?? null;
+                } elseif (count($photoPaths) === 1) {
+                    $groupResp = $this->sendTelegramSinglePhoto($this->groupChatId, $photoPaths[0], $caption);
                     $groupMsgId = $groupResp->json('result.message_id');
                 } else {
                     $groupResp = Http::timeout(30)->post("https://api.telegram.org/bot{$this->botToken}/sendMessage", [
@@ -130,44 +129,98 @@ class ListingSocialPublisherService
             throw new RuntimeException("Instagram sozlamalari to'liq emas (.env faylida META_PAGE_ACCESS_TOKEN va INSTAGRAM_ACCOUNT_ID kerak).");
         }
 
-        $firstMedia = $listing->getFirstMedia('images');
-        if (! $firstMedia) {
+        $mediaItems = $listing->getMedia('images');
+        if ($mediaItems->isEmpty()) {
             throw new RuntimeException("Instagram post uchun e'lonning rasmi topilmadi.");
         }
 
-        $imageUrl = $firstMedia->getFullUrl();
-        // Tashqi ochiq domen bo'lishini ta'minlash
-        if ($imageUrl && ! str_starts_with($imageUrl, 'http')) {
-            $imageUrl = 'https://motrix.uz/' . ltrim($imageUrl, '/');
-        } elseif ($imageUrl && (str_contains($imageUrl, '192.168.') || str_contains($imageUrl, '127.0.0.1') || str_contains($imageUrl, 'localhost'))) {
-            $parsed = parse_url($imageUrl);
-            $imageUrl = 'https://motrix.uz' . ($parsed['path'] ?? '');
+        $imageUrls = [];
+        foreach ($mediaItems->take(10) as $media) {
+            $url = $media->getFullUrl();
+            if ($url && ! str_starts_with($url, 'http')) {
+                $url = 'https://motrix.uz/' . ltrim($url, '/');
+            } elseif ($url && (str_contains($url, '192.168.') || str_contains($url, '127.0.0.1') || str_contains($url, 'localhost'))) {
+                $parsed = parse_url($url);
+                $url = 'https://motrix.uz' . ($parsed['path'] ?? '');
+            }
+            if ($url) {
+                $imageUrls[] = $url;
+            }
+        }
+
+        if (empty($imageUrls)) {
+            throw new RuntimeException("Instagram post uchun yaroqli rasm havolasi topilmadi.");
         }
 
         $caption = $this->buildInstagramCaption($listing);
 
-        // 1-qadam: Image Media Container yaratish
-        $createUrl = "https://graph.facebook.com/v21.0/{$this->instagramAccountId}/media";
-        $createResponse = Http::timeout(60)->post($createUrl, [
-            'image_url' => $imageUrl,
-            'caption' => $caption,
-            'access_token' => $this->instagramAccessToken,
-        ]);
+        if (count($imageUrls) > 1) {
+            // 1-qadam: Har bir rasm uchun karusel elementi konteynerini yaratish
+            $childIds = [];
+            foreach ($imageUrls as $imgUrl) {
+                $childResp = Http::timeout(45)->post("https://graph.facebook.com/v21.0/{$this->instagramAccountId}/media", [
+                    'image_url' => $imgUrl,
+                    'is_carousel_item' => 'true',
+                    'access_token' => $this->instagramAccessToken,
+                ]);
 
-        if (! $createResponse->successful()) {
-            $error = $createResponse->json('error.message') ?? $createResponse->body();
-            Log::error('Instagram listing container creation error: ' . $error);
-            throw new RuntimeException("Instagram konteyner yaratishda xatolik: {$error}");
+                if (! $childResp->successful()) {
+                    $err = $childResp->json('error.message') ?? $childResp->body();
+                    Log::error("Instagram carousel item creation error: " . $err);
+                    throw new RuntimeException("Instagram karusel rasmini yuklashda xatolik: {$err}");
+                }
+
+                $childId = $childResp->json('id');
+                if ($childId) {
+                    $childIds[] = $childId;
+                }
+            }
+
+            if (empty($childIds)) {
+                throw new RuntimeException("Instagram karusel elementlari yaratilmadi.");
+            }
+
+            // 2-qadam: Karusel asosiy konteynerini yaratish
+            $createUrl = "https://graph.facebook.com/v21.0/{$this->instagramAccountId}/media";
+            $createResponse = Http::timeout(60)->post($createUrl, [
+                'media_type' => 'CAROUSEL',
+                'children' => implode(',', $childIds),
+                'caption' => $caption,
+                'access_token' => $this->instagramAccessToken,
+            ]);
+
+            if (! $createResponse->successful()) {
+                $error = $createResponse->json('error.message') ?? $createResponse->body();
+                Log::error('Instagram listing carousel container creation error: ' . $error);
+                throw new RuntimeException("Instagram karusel yaratishda xatolik: {$error}");
+            }
+
+            $creationId = $createResponse->json('id');
+        } else {
+            // Bitta rasm posti
+            $createUrl = "https://graph.facebook.com/v21.0/{$this->instagramAccountId}/media";
+            $createResponse = Http::timeout(60)->post($createUrl, [
+                'image_url' => $imageUrls[0],
+                'caption' => $caption,
+                'access_token' => $this->instagramAccessToken,
+            ]);
+
+            if (! $createResponse->successful()) {
+                $error = $createResponse->json('error.message') ?? $createResponse->body();
+                Log::error('Instagram listing container creation error: ' . $error);
+                throw new RuntimeException("Instagram konteyner yaratishda xatolik: {$error}");
+            }
+
+            $creationId = $createResponse->json('id');
         }
 
-        $creationId = $createResponse->json('id');
         if (! $creationId) {
             throw new RuntimeException("Instagram konteyner ID olinmadi.");
         }
 
-        // 2-qadam: Meta serverlari rasmni yuklab olishini kutish (polling)
+        // Meta serverlari karusel/rasmni qayta ishlashini kutish (polling)
         $statusUrl = "https://graph.facebook.com/v21.0/{$creationId}";
-        for ($i = 0; $i < 6; $i++) {
+        for ($i = 0; $i < 8; $i++) {
             sleep(3);
             $checkResponse = Http::timeout(15)->get($statusUrl, [
                 'fields' => 'status_code',
