@@ -401,7 +401,7 @@
                     ['name' => 'Instagram', 'handle' => '@motrix.uz', 'url' => 'https://instagram.com/motrix.uz', 'color' => '#E1306C'],
                     ['name' => 'TikTok', 'handle' => '@motrix.uz', 'url' => 'https://tiktok.com/@motrix.uz', 'color' => '#25F4EE'],
                     ['name' => 'Facebook', 'handle' => 'Motrix.uz', 'url' => 'https://facebook.com/motrix.uz', 'color' => '#1877F2'],
-                    ['name' => 'YouTube', 'handle' => '@motrix.uz', 'url' => 'https://youtube.com/@motrix.uz', 'color' => '#FF0000'],
+                    ['name' => 'YouTube', 'handle' => '@Motrixuz', 'url' => 'https://www.youtube.com/@Motrixuz', 'color' => '#FF0000'],
                 ];
             @endphp
 

@@ -80,11 +80,11 @@
                     <a href="https://t.me/Motrixuz" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-semibold hover:bg-sky-500/20 transition">
                         <span>Telegram: @Motrixuz</span>
                     </a>
-                    <a href="https://youtube.com/@Motrixuz" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-semibold hover:bg-red-500/20 transition">
+                    <a href="https://www.youtube.com/@Motrixuz" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-semibold hover:bg-red-500/20 transition">
                         <span>YouTube: @Motrixuz</span>
                     </a>
-                    <a href="https://instagram.com/motrixuz" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400 text-xs font-semibold hover:bg-pink-500/20 transition">
-                        <span>Instagram: motrixuz</span>
+                    <a href="https://instagram.com/motrix.uz" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400 text-xs font-semibold hover:bg-pink-500/20 transition">
+                        <span>Instagram: @motrix.uz</span>
                     </a>
                 </div>
             </div>
