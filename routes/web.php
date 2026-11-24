@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\YouTubeOAuthController;
 use App\Http\Controllers\AdPromotionController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProfileController;
@@ -18,6 +19,7 @@ Route::get('/', HomeController::class)->name('home');
 Route::get('/search', [SearchController::class, 'index'])->name('search.index');
 Route::get('/api/location/approximate', [LocationController::class, 'approximate'])->name('api.location.approximate');
 Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:6,1')->name('feedback.store');
 
 Route::get('/manifest.json', function () {
     return response(file_get_contents(public_path('manifest.json')), 200, [

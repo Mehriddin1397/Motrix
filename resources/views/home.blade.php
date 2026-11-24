@@ -800,6 +800,7 @@
 
     <x-phone-share-modal />
     <x-pwa-manager />
+    <x-feedback-modal />
 
 </body>
 </html>

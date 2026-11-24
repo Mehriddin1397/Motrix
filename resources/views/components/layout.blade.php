@@ -131,6 +131,7 @@
 
             <x-phone-share-modal />
             <x-pwa-manager />
+            <x-feedback-modal />
         </div>
     </body>
 </html>
