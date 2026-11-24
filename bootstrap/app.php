@@ -23,5 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->reportable(function (\Throwable $e) {
+            \App\Services\TelegramErrorNotifier::notify($e);
+        });
     })->create();
