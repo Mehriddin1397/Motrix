@@ -60,6 +60,21 @@
         </div>
     @endif
 
+    @if($listing->status === 'sold')
+        <div class="mx-4 mt-3 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-center dark:bg-rose-950/30">
+            <div class="flex items-center justify-center gap-2 text-base font-bold text-rose-600 dark:text-rose-400">
+                <span>❌</span>
+                <span>Ushbu mototsikl muvaffaqiyatli sotildi!</span>
+            </div>
+            <p class="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+                Sotuvchi ushbu mototsiklni sotilgan deb belgilagan. Boshqa yangi mototsikllarni bozorda ko'rishingiz mumkin.
+            </p>
+            <a href="{{ route('market.index') }}" class="mt-2.5 inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow transition hover:bg-rose-500">
+                Barcha e'lonlarni ko'rish →
+            </a>
+        </div>
+    @endif
+
     <div 
         x-data="listingDetail({
             images: {{ Js::from($imageUrls) }},
@@ -330,14 +345,24 @@
                         />
                     @endif
 
-                    <button 
-                        type="button" 
-                        @click="openContactModal()" 
-                        class="inline-flex items-center justify-center gap-2 rounded-xl {{ $effectiveShop ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900' : 'bg-amber-500 text-zinc-950 font-bold' }} px-4 py-2 text-xs sm:text-sm font-semibold shadow transition hover:opacity-90 active:scale-95"
-                    >
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                        <span>Bog'lanish</span>
-                    </button>
+                    @if($listing->status === 'sold')
+                        <button 
+                            type="button" 
+                            disabled
+                            class="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-zinc-200 px-4 py-2 text-xs sm:text-sm font-semibold text-zinc-500 shadow dark:bg-zinc-800 dark:text-zinc-400"
+                        >
+                            <span>❌ Sotilgan</span>
+                        </button>
+                    @else
+                        <button 
+                            type="button" 
+                            @click="openContactModal()" 
+                            class="inline-flex items-center justify-center gap-2 rounded-xl {{ $effectiveShop ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900' : 'bg-amber-500 text-zinc-950 font-bold' }} px-4 py-2 text-xs sm:text-sm font-semibold shadow transition hover:opacity-90 active:scale-95"
+                        >
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                            <span>Bog'lanish</span>
+                        </button>
+                    @endif
 
                     @if($effectiveShop)
                         <a 

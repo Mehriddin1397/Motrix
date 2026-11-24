@@ -452,7 +452,7 @@ class ListingSocialPublisherService
     }
 
     /**
-     * Instagram uchun post tavsifi va xeshteglar.
+     * Instagram uchun post tavsifi va xeshteglar (Telegram kanali uslubida).
      */
     protected function buildInstagramCaption(Listing $listing): string
     {
@@ -462,6 +462,8 @@ class ListingSocialPublisherService
         $mileage = number_format($listing->mileage_km, 0, '.', ' ') . ' km';
         $condition = $listing->condition === 'new' ? 'Yangi' : 'Ishlatilgan';
         $cityName = $listing->city?->name ?? 'O\'zbekiston';
+        $sellerName = $listing->user?->name ?? 'Sotuvchi';
+        $phone = $listing->user?->phone ?: 'Saytda ko\'rsatilgan';
         $webUrl = "https://motrix.uz/market/{$listing->id}";
 
         $desc = '';
@@ -470,17 +472,19 @@ class ListingSocialPublisherService
             if (mb_strlen($rawDesc) > 300) {
                 $rawDesc = mb_substr($rawDesc, 0, 295) . '...';
             }
-            $desc = "\n\n" . $rawDesc;
+            $desc = "\n📝 Qo'shimcha ma'lumot:\n" . $rawDesc . "\n";
         }
 
-        return "🏍 Sotiladi: {$title} ({$year})\n\n"
+        return "🏍 {$title} ({$year}-yil)\n\n"
             . "💰 Narxi: {$price}\n"
             . "📍 Shahar: {$cityName}\n"
-            . "⏱ Probeg: {$mileage}\n"
-            . "⚙️ Holati: {$condition}"
-            . $desc . "\n\n"
-            . "📌 Sotuvchi bilan bog'lanish va to'liq ma'lumot saytda:\n"
-            . "👉 {$webUrl}\n\n"
+            . "⏱ Yurgani: {$mileage}\n"
+            . "⚙️ Holati: {$condition}\n"
+            . $desc . "\n"
+            . "📞 Bog'lanish: {$phone} ({$sellerName})\n"
+            . "🔗 Batafsil saytda ko'rish: motrix.uz/market/{$listing->id}\n\n"
+            . "🌐 Telegram: @Motrixuz | @Motrix_uz\n"
+            . "🌐 Sayt: motrix.uz\n\n"
             . "#motrix #motobozor #mototsikl #uzbekistan #toshkent #motoelon #motouzb";
     }
 }
