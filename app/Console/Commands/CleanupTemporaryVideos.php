@@ -47,7 +47,7 @@ class CleanupTemporaryVideos extends Command
                 $deletedCount++;
             }
 
-            $post->update(['video_path' => null]);
+            $post->update(['video_path' => '']);
         }
 
         $mb = round($freedBytes / (1024 * 1024), 2);
