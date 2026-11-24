@@ -130,4 +130,69 @@ class MotorcycleRecognitionTest extends TestCase
             'success' => false,
         ]);
     }
+
+    public function test_service_accurately_recognizes_soviet_retro_motorcycle(): void
+    {
+        $brand = Brand::create([
+            'name' => 'Minsk',
+            'slug' => 'minsk',
+            'is_active' => true,
+        ]);
+
+        $category = \Modules\Motorcycle\Models\MotorcycleCategory::create([
+            'name' => 'Standard',
+            'slug' => 'standard',
+        ]);
+
+        $motorcycle = Motorcycle::create([
+            'brand_id' => $brand->id,
+            'category_id' => $category->id,
+            'name' => 'Minsk MMVZ-3.111',
+            'slug' => 'minsk-mmvz-3-111',
+            'status' => 'published',
+        ]);
+
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'candidates' => [
+                    [
+                        'content' => [
+                            'parts' => [
+                                [
+                                    'text' => json_encode([
+                                        'is_motorcycle' => true,
+                                        'brand' => 'ММВЗ',
+                                        'model' => '3.111',
+                                        'year' => 1973,
+                                        'condition' => 'used',
+                                        'category' => 'Standard',
+                                        'engine_cc' => 125,
+                                        'description' => 'Sotiladi: 1973-yilgi Minsk MMVZ-3.111 mototsikli.',
+                                        'confidence' => 'high',
+                                    ])
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ], 200),
+        ]);
+
+        $user = User::factory()->create();
+        $file = UploadedFile::fake()->image('minsk.jpg', 800, 600);
+
+        $response = $this->actingAs($user)->postJson(route('market.ai-identify'), [
+            'image' => $file,
+        ]);
+
+        $response->assertOk();
+        $response->assertJson([
+            'success' => true,
+            'brand_id' => $brand->id,
+            'brand_name' => 'Minsk',
+            'motorcycle_id' => $motorcycle->id,
+            'year' => 1973,
+            'condition' => 'used',
+        ]);
+    }
 }

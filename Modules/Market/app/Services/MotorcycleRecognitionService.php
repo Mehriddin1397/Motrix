@@ -57,25 +57,46 @@ class MotorcycleRecognitionService
 Siz mototsikl, skuter, moped va kvadrotsikllarni professional darajada aniq taniydigan mutaxassis AI tizimisiz.
 Ushbu fotosuratni sinchiklab tahlil qiling.
 
-QOIDALAR:
+MUHIM QOIDALAR:
 1. Agar rasmdan mototsikl, skuter, moped, kvadrotsikl yoki shunga o'xshash moto-texnika topilmasa (masalan: mashina, odam, hujjat yoki noaniq narsa bo'lsa), "is_motorcycle": false qilib qaytaring.
-2. Agar moto-texnika topilsa, "is_motorcycle": true qiling va uning brendi, modeli, taxminiy ishlab chiqarilgan yili, toifasi (Sport, Naked, Enduro, Touring, Cruiser, Classic, Scooter, Moped) va taxminiy dvigatel hajmini aniqlang.
-3. Bizning platformamizdagi brendlar ro'yxati: [{$brandsList}]. Agar rasmdagi brend shu ro'yxatda mavjud bo'lsa, xuddi shu nomni ishlating (masalan, "Honda", "Yamaha", "Kawasaki", "BMW" va h.k.).
-4. "model" maydoniga mototsiklning aniq model nomini yozing (masalan, "CBR1000RR", "MT-07", "Ninja 400", "PCX 125", "Dio", "Pulsar NS200").
-5. "year" maydoniga rasmdagi dizayn va avlodga qarab taxminiy ishlab chiqarilgan yilini butun son sifatida yozing (masalan: 2020).
+
+2. RETRO VA SOVET DAVRI MOTO-TEXNIKALARI:
+O'zbekistonda 1960-1990 yillarda ishlab chiqarilgan sovet va Chexoslovakiya klassik mototsikllari juda ko'p uchraydi. Ular dumaloq fara, spitsa g'ildiraklar, tomchisimon yoki to'rtburchak klassik bak, xromlangan trubalar va xarakterli dvigatel qovurg'alariga ega.
+Asosiy retro brendlar va modellar:
+- Minsk (Минск / ММВЗ — 3.111, 3.115, 3.112)
+- Izh (Иж — Planeta 3, Planeta 4, Planeta 5, Yupiter 3, Yupiter 4, Yupiter 5)
+- Vosxod (Восход — 2, 2M, 3, 3M)
+- Jawa (Ява — 350 Typ 634, 350 Typ 638 Lyuks)
+- ČZ (Чезеt — 350 Typ 472)
+- Ural (Урал — M-66, M-67, M-67-36, kajavali/lyulkali)
+- Dnepr (Днепр — MT-9, MT-10, MT-11, kajavali)
+- Muravey (Муравей — 3 g'ildirakli yuk motorolleri 2M-01)
+- Riga / Delta (Рига — Riga-16, Delta RMR-24)
+- Karpaty (Карпаты — Karpaty-2)
+- Vyatka (Вятка — VP-150, Elektron)
+
+DIQQAT: Ushbu retro texnikalarni hech qachon zamonaviy brendlar (Alpha, Royal Enfield, Lifan va h.k.) bilan adashtirmang va ularga majburlab bog'lamang! Haqiqiy tarixiy brendi va modelini aniqlang.
+
+3. BARCHA BRENDLAR:
+Bizning platformamizdagi asosiy brendlar: [{$brandsList}].
+Agar rasmdagi brend shu ro'yxatda mavjud bo'lsa, xuddi shu nomni ishlating (masalan, "Minsk", "Izh", "Jawa", "Ural", "Honda", "Yamaha", "Kawasaki", "Bajaj", "KTM", "Alpha" va h.k.).
+Agar brend ro'yxatda bo'lmasa ham, o'zining asl haqiqiy xalqaro brend nomini qaytaring.
+
+4. "model" maydoniga mototsiklning aniq model nomini yozing (masalan, "MMVZ-3.111", "Planeta 5", "Yupiter 4", "350 Typ 638", "M-67-36", "CBR1000RR", "MT-07", "Ninja 400", "RX 110", "Pulsar NS200").
+5. "year" maydoniga rasmdagi dizayn va avlodga qarab taxminiy ishlab chiqarilgan yilini butun son sifatida yozing (masalan: 1973, 1985, 2020).
 6. "condition" maydoniga mototsiklning ko'rinishiga qarab "new" yoki "used" deb yozing.
 7. "description" maydoniga O'zbek tilida sotuvchi nomidan yozilgan, xaridorni qiziqtiradigan 2-3 jumlali professional e'lon tavsifini yozing.
 
 Javobni FAQAT quyidagi JSON formatida qaytaring:
 {
   "is_motorcycle": true,
-  "brand": "Honda",
-  "model": "Dio",
-  "year": 2018,
+  "brand": "Minsk",
+  "model": "MMVZ-3.111",
+  "year": 1973,
   "condition": "used",
-  "category": "Scooter",
-  "engine_cc": 50,
-  "description": "Sotiladi: A'lo holatdagi Honda Dio skuteri...",
+  "category": "Standard",
+  "engine_cc": 125,
+  "description": "Sotiladi: 1973-yilgi afsonaviy Minsk MMVZ-3.111 mototsikli...",
   "confidence": "high"
 }
 PROMPT;
@@ -155,9 +176,40 @@ PROMPT;
         // 4. Bazadagi Brendni topish
         $matchedBrand = null;
         if (! empty($aiBrand)) {
-            $matchedBrand = Brand::whereRaw('LOWER(name) = ?', [mb_strtolower($aiBrand)])
-                ->orWhere('name', 'LIKE', "%{$aiBrand}%")
-                ->first();
+            $cleanAiBrand = mb_strtolower(trim($aiBrand));
+            // Aniq moslik yoki sovet/ruscha nomlar muqobillari
+            $brandAliases = [
+                'мвз' => 'Minsk',
+                'ммвз' => 'Minsk',
+                'минск' => 'Minsk',
+                'иж' => 'Izh',
+                'ижевск' => 'Izh',
+                'восход' => 'Vosxod',
+                'зид' => 'Vosxod',
+                'урал' => 'Ural',
+                'имз' => 'Ural',
+                'днепр' => 'Dnepr',
+                'кмз' => 'Dnepr',
+                'ява' => 'Jawa',
+                'чезет' => 'ČZ',
+                'чз' => 'ČZ',
+                'муравей' => 'Muravey',
+                'рига' => 'Riga',
+                'дельта' => 'Riga',
+                'карпаты' => 'Karpaty',
+                'вятка' => 'Vyatka',
+                'электрон' => 'Vyatka',
+            ];
+
+            if (isset($brandAliases[$cleanAiBrand])) {
+                $matchedBrand = Brand::where('name', $brandAliases[$cleanAiBrand])->first();
+            }
+
+            if (! $matchedBrand) {
+                $matchedBrand = Brand::whereRaw('LOWER(name) = ?', [$cleanAiBrand])
+                    ->orWhere('name', 'LIKE', "%{$aiBrand}%")
+                    ->first();
+            }
         }
 
         // 5. Bazadagi Modelni topish
@@ -167,11 +219,13 @@ PROMPT;
             $matchedMoto = $this->findBestMatchingMotorcycle($brandMotorcycles, $aiModel);
         }
 
-        if (! $matchedMoto && ! empty($aiModel)) {
+        // Agar brend topilmagan bo'lsa, umumiy bazadan qat'iy qidirish
+        if (! $matchedMoto && ! $matchedBrand && ! empty($aiModel)) {
             $allMotorcycles = Motorcycle::with('brand')->get();
-            $matchedMoto = $this->findBestMatchingMotorcycle($allMotorcycles, $aiModel);
-            if ($matchedMoto && ! $matchedBrand) {
-                $matchedBrand = $matchedMoto->brand;
+            $candidateMoto = $this->findBestMatchingMotorcycle($allMotorcycles, $aiModel);
+            if ($candidateMoto) {
+                $matchedMoto = $candidateMoto;
+                $matchedBrand = $candidateMoto->brand;
             }
         }
 
@@ -189,7 +243,7 @@ PROMPT;
             'motorcycle_id' => $matchedMoto?->id,
             'motorcycle_name' => $matchedMoto ? ($matchedMoto->brand?->name . ' ' . $matchedMoto->name) : null,
             'custom_title' => $customTitle,
-            'year' => $aiYear > 1950 && $aiYear <= (date('Y') + 1) ? $aiYear : date('Y'),
+            'year' => $aiYear >= 1950 && $aiYear <= (date('Y') + 1) ? $aiYear : date('Y'),
             'condition' => $aiCondition,
             'category' => $aiCategory,
             'engine_cc' => $aiEngineCc,
@@ -199,16 +253,34 @@ PROMPT;
     }
 
     /**
-     * Model nomini eng mos keladiganiga solishtirish.
+     * Model nomini eng mos keladiganiga solishtirish (aniq va xavfsiz moslash).
      */
     protected function findBestMatchingMotorcycle($motorcycles, string $aiModel): ?Motorcycle
     {
-        $cleanAiModel = mb_strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $aiModel));
+        $cleanAi = mb_strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $aiModel));
+        if (strlen($cleanAi) < 2) {
+            return null;
+        }
 
+        // 1-bosqich: To'liq aynan moslik (Exact clean match)
+        foreach ($motorcycles as $moto) {
+            $cleanName = mb_strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $moto->name));
+            if ($cleanName === $cleanAi) {
+                return $moto;
+            }
+        }
+
+        // 2-bosqich: Model indeksi mosligi (masalan "3111" => "MMVZ-3.111", "planeta5" => "Izh Planeta 5")
         foreach ($motorcycles as $moto) {
             $cleanName = mb_strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $moto->name));
 
-            if ($cleanName === $cleanAiModel || str_contains($cleanName, $cleanAiModel) || str_contains($cleanAiModel, $cleanName)) {
+            // Agar AI model kodi kamida 3 belgi bo'lib, moto nomida mavjud bo'lsa
+            if (strlen($cleanAi) >= 3 && str_contains($cleanName, $cleanAi)) {
+                return $moto;
+            }
+
+            // Yoki moto nomi AI model nomida to'liq bo'lsa (faqat kamida 4 belgi bo'lganda)
+            if (strlen($cleanName) >= 4 && str_contains($cleanAi, $cleanName)) {
                 return $moto;
             }
         }
