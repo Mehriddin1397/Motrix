@@ -100,6 +100,10 @@
         {{-- On phone-sized screens this row is hidden entirely — the same
              destinations are reachable from the bottom tab bar instead. --}}
         <nav class="hidden items-center gap-6 text-sm font-medium text-white/70 md:flex">
+            <a href="{{ route('market.index') }}" class="flex items-center gap-1.5 font-bold text-amber-400 transition hover:text-amber-300">
+                <span>🛒</span>
+                <span>Moto Bozor</span>
+            </a>
             <a href="{{ route('motorcycle.index') }}" class="transition hover:text-white">Katalog</a>
             <a href="{{ route('comparison.index') }}" class="transition hover:text-white">Taqqoslash</a>
             <a href="{{ route('quiz.index') }}" class="transition hover:text-white flex items-center gap-1">
@@ -109,30 +113,22 @@
             <a href="{{ route('news.index') }}" class="transition hover:text-white">Bilimlar bazasi</a>
             <a href="{{ route('video.index') }}" class="transition hover:text-white">Video</a>
 
-            {{-- Bozor / Ehtiyot qismlar / Ustaxonalar unified under one dropdown --}}
+            {{-- Xizmatlar: Ehtiyot qismlar va Ustaxonalar (ikkilamchi menyu) --}}
             <div class="group relative">
-                <button type="button" class="flex items-center gap-1 transition hover:text-white">
-                    Bozor
-                    <svg class="h-3.5 w-3.5 transition group-hover:rotate-180 group-focus-within:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                <button type="button" class="flex items-center gap-1 text-white/60 transition hover:text-white text-xs">
+                    Xizmatlar
+                    <svg class="h-3 w-3 transition group-hover:rotate-180 group-focus-within:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                 </button>
-                <div class="invisible absolute left-1/2 top-full z-10 w-64 -translate-x-1/2 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                <div class="invisible absolute left-1/2 top-full z-10 w-56 -translate-x-1/2 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
                     <div class="glass-panel rounded-2xl p-2">
-                        @foreach([
-                            ['label' => 'Mototsikl bozori', 'desc' => 'Sotiladigan mototsikllar', 'route' => 'market.index'],
-                            ['label' => 'Ehtiyot qismlar', 'desc' => 'Moto ehtiyot qismlari va aksessuarlar', 'route' => 'parts.index'],
-                            ['label' => 'Ustaxonalar', 'desc' => "Xizmat ko'rsatish shoxobchalari", 'route' => 'servicecenter.index'],
-                        ] as $item)
-                            <a href="{{ route($item['route']) }}" class="block rounded-xl px-3 py-2 text-left transition hover:bg-white/10">
-                                <div class="text-sm font-semibold text-white">{{ $item['label'] }}</div>
-                                <div class="text-xs text-white/50">{{ $item['desc'] }}</div>
-                            </a>
-                        @endforeach
-                        <div class="mt-1 border-t border-white/10 pt-1">
-                            <a href="{{ auth()->check() ? route('market.create') : route('register') }}" class="flex items-center gap-2 rounded-xl bg-amber-500/15 px-3 py-2 text-left text-sm font-semibold text-amber-400 transition hover:bg-amber-500/25">
-                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                                <span>+ E'lon joylashtirish</span>
-                            </a>
-                        </div>
+                        <a href="{{ route('parts.index') }}" class="block rounded-xl px-3 py-2 text-left transition hover:bg-white/10">
+                            <div class="text-xs font-semibold text-white">🔧 Ehtiyot qismlar</div>
+                            <div class="text-[10px] text-white/50">Qismlar va aksessuarlar</div>
+                        </a>
+                        <a href="{{ route('servicecenter.index') }}" class="block rounded-xl px-3 py-2 text-left transition hover:bg-white/10">
+                            <div class="text-xs font-semibold text-white">🛠️ Ustaxonalar</div>
+                            <div class="text-[10px] text-white/50">Servis va ta'mirlash</div>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -162,15 +158,13 @@
                 </svg>
             </button>
 
-            @auth
-                <a
-                    href="{{ route('market.create') }}"
-                    class="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-3.5 py-1.5 text-xs font-bold text-zinc-950 shadow-md transition hover:bg-amber-400 hover:scale-[1.03]"
-                >
-                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    <span>E'lon berish</span>
-                </a>
-            @endauth
+            <a
+                href="{{ auth()->check() ? route('market.create') : route('register') }}"
+                class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 px-3.5 py-1.5 text-xs font-bold text-zinc-950 shadow-md shadow-amber-500/20 transition hover:scale-[1.03] hover:from-amber-300 hover:to-amber-400"
+            >
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                <span>E'lon berish</span>
+            </a>
 
             <a
                 href="{{ auth()->check() ? route('profile.edit') : route('login') }}"
@@ -227,18 +221,17 @@
                         O'zbekistondagi birinchi moto-ekotizim
                     </p>
                     <h1 class="text-4xl font-extrabold leading-tight sm:text-6xl lg:text-7xl">
-                        Mototsikl dunyosi <span class="neon-gradient-text">bitta ekotizimda</span>
+                        Mototsikl sotish va sotib olish <span class="neon-gradient-text">endi oson</span>
                     </h1>
                     <p class="mx-auto mt-5 max-w-xl text-base text-white/70 sm:text-lg">
-                        Katalog, bozor, ehtiyot qismlar, ustaxonalar va yangiliklar — Motrix.uz barchasini
-                        bir joyga jamladi.
+                        Eng ma'qul narxdagi mototsikllarni toping yoki o'z motongizni bir zumda sotuvga qo'ying. AI yordamida rasmdan ma'lumotlarni to'ldirish va bepul e'lon berish!
                     </p>
                     <div class="pointer-events-auto mt-8 flex flex-wrap items-center justify-center gap-3">
-                        <a href="#ekosistema" class="rounded-full bg-gradient-to-r from-[var(--landing-accent-2)] to-[var(--landing-accent)] px-6 py-3 text-sm font-bold text-[#04121a] transition hover:scale-[1.03]">
-                            Ekotizimni ko'rish
+                        <a href="{{ route('market.index') }}" class="rounded-full bg-gradient-to-r from-[var(--landing-accent-2)] to-[var(--landing-accent)] px-6 py-3 text-sm font-bold text-[#04121a] shadow-lg transition hover:scale-[1.03]">
+                            🛒 Moto Bozorni ko'rish
                         </a>
-                        <a href="#ilova" class="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:scale-[1.03] hover:bg-white/10">
-                            Ilovani sinab ko'ring
+                        <a href="{{ auth()->check() ? route('market.create') : route('register') }}" class="rounded-full border border-amber-400/50 bg-amber-500/15 px-6 py-3 text-sm font-bold text-amber-300 transition hover:scale-[1.03] hover:bg-amber-500/25">
+                            ➕ Bepul e'lon joylashtirish
                         </a>
                     </div>
                 </div>
@@ -268,9 +261,9 @@
 
                 {{-- Beats 2-4: the value points, revealed one by one --}}
                 @foreach([
-                    ['start' => 0.34, 'text' => "Katalog va bozor — modelni tanlab, ishonchli sotib oling"],
-                    ['start' => 0.46, 'text' => 'Ehtiyot qismlar va ustaxonalar — hammasi yaqin atrofda'],
-                    ['start' => 0.58, 'text' => "Yangiliklar va hamjamiyat — doim xabardor bo'ling"],
+                    ['start' => 0.34, 'text' => "Moto bozor va e'lonlar — xarid qiling yoki o'z motongizni soting"],
+                    ['start' => 0.46, 'text' => "AI yordamchi va katalog — eng ma'qul modelni tez toping"],
+                    ['start' => 0.58, 'text' => "Ehtiyot qismlar, ustaxonalar va yangiliklar — yagona platformada"],
                 ] as $point)
                     @php $mid = $point['start'] + 0.10; @endphp
                     <div
@@ -330,29 +323,29 @@
             @php
                 $features = [
                     [
-                        'title' => 'Katalog va texnik xususiyatlar',
-                        'desc' => "Mototsikllar haqida to'liq ma'lumotlar — texnik xususiyatlar, rasmlar va modellarni solishtirish.",
-                        'icon' => 'catalog',
-                    ],
-                    [
-                        'title' => "Bozor va e'lonlar",
-                        'desc' => "Sotiladigan mototsikl e'lonlari — ishonchli sotuvchilar bilan to'g'ridan-to'g'ri aloqa.",
+                        'title' => "Moto bozor va e'lonlar",
+                        'desc' => "Mototsikl sotish va sotib olish — qulay qidiruv, bepul e'lon joylashtirish va ishonchli sotuvchilar.",
                         'icon' => 'market',
                     ],
                     [
-                        'title' => 'Ehtiyot qismlar va aksessuarlar',
-                        'desc' => 'Moto ehtiyot qismlari va aksessuarlarini tez va qulay tarzda toping.',
-                        'icon' => 'parts',
+                        'title' => 'Katalog va texnik xususiyatlar',
+                        'desc' => "80+ dan ortiq mototsikllar haqida to'liq ma'lumotlar, texnik parametrlar va taqqoslash.",
+                        'icon' => 'catalog',
                     ],
                     [
-                        'title' => 'Ustaxonalar va servis markazlari',
-                        'desc' => "Moto ustaxonalari va xizmat ko'rsatish shoxobchalari — barchasi bir joyda.",
-                        'icon' => 'workshop',
+                        'title' => 'AI Moto-maslahatchi',
+                        'desc' => "Rasmdan mototsikl parametrlarini aniqlash va byudjetga mos model tanlash bo'yicha aqlli yordamchi.",
+                        'icon' => 'ai',
                     ],
                     [
                         'title' => 'Yangiliklar va media markaz',
-                        'desc' => "Eng so'nggi moto yangiliklar, sharhlar va videolar yagona manbada.",
+                        'desc' => "Eng so'nggi moto yangiliklar, foydali maqolalar va professional sharhlar.",
                         'icon' => 'news',
+                    ],
+                    [
+                        'title' => 'Ehtiyot qismlar va ustaxonalar',
+                        'desc' => "Ehtiyot qismlar, aksessuarlar va yaqin atrofingizdagi moto servis markazlari.",
+                        'icon' => 'parts',
                     ],
                 ];
             @endphp
@@ -363,6 +356,9 @@
                         @switch($feature['icon'])
                             @case('catalog')
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5.5A1.5 1.5 0 015.5 4h13A1.5 1.5 0 0120 5.5v13a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 18.5v-13zM8 9h8M8 13h8M8 17h4" /></svg>
+                                @break
+                            @case('ai')
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><rect x="3" y="11" width="18" height="10" rx="2" /><circle cx="12" cy="5" r="2" /><path d="M12 7v4" /><line x1="8" y1="16" x2="8.01" y2="16" /><line x1="16" y1="16" x2="16.01" y2="16" /></svg>
                                 @break
                             @case('market')
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9.5 5 4h14l2 5.5M3 9.5v9A1.5 1.5 0 004.5 20h15a1.5 1.5 0 001.5-1.5v-9M3 9.5h18M9 13.5a3 3 0 006 0" /></svg>
@@ -428,43 +424,19 @@
     </section>
 
     {{-- ========================= FEATURED MEDIA SECTION ======================= --}}
-    <section id="media" class="relative px-5 py-20 sm:px-10 lg:py-28">
+    <section id="media" class="relative px-5 py-16 sm:px-10 lg:py-20">
         <div class="mx-auto max-w-6xl">
             <div class="reveal glass-panel neon-glow flex flex-col items-center justify-between gap-6 rounded-3xl p-8 text-center sm:flex-row sm:p-10 sm:text-left">
                 <div class="max-w-xl">
                     <p class="text-xs font-semibold uppercase tracking-widest text-[var(--landing-accent)]">Media markaz</p>
-                    <h2 class="mt-2 text-2xl font-extrabold sm:text-3xl">Ijtimoiy tarmoqlardagi videolar — endi bir joyda</h2>
+                    <h2 class="mt-2 text-2xl font-extrabold sm:text-3xl">Video sharhlar va qo'llanmalar</h2>
                     <p class="mt-3 text-sm text-white/60 sm:text-base">
-                        Telegram, Instagram, TikTok, Facebook va YouTube'da chop etilgan moto-sharhlar,
-                        qo'llanmalar va videolarni endi alohida qidirish shart emas — ularni to'g'ridan-to'g'ri
-                        Motrix.uz saytida topasiz.
+                        Mototsikllar sinovi, yangi modellar video-sharhlari va foydali qo'llanmalarni to'g'ridan-to'g'ri Motrix.uz saytida tomosha qiling.
                     </p>
                 </div>
                 <a href="{{ route('video.index') }}" class="shrink-0 rounded-full bg-gradient-to-r from-[var(--landing-accent-2)] to-[var(--landing-accent)] px-6 py-3 text-sm font-bold text-[#04121a] transition hover:scale-[1.03]">
                     Barcha videolarni ko'rish →
                 </a>
-            </div>
-
-            {{-- Illustrative video teaser row --}}
-            <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                @foreach([
-                    ['title' => 'Yangi model sharhi', 'platform' => 'YouTube'],
-                    ['title' => "Ustaxonada ta'mirlash bo'yicha qo'llanma", 'platform' => 'Instagram'],
-                    ['title' => 'Bozordagi eng qidiriladigan motolar', 'platform' => 'TikTok'],
-                    ['title' => 'Hamjamiyat safari — vlog', 'platform' => 'Telegram'],
-                ] as $video)
-                    <div class="reveal glass-panel overflow-hidden rounded-2xl transition hover:-translate-y-1">
-                        <div class="relative flex aspect-video items-center justify-center bg-gradient-to-br from-white/10 to-white/[0.02]">
-                            <span class="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm">
-                                <svg class="ml-0.5 h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                            </span>
-                            <span class="absolute left-2.5 top-2.5 rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-semibold text-[var(--landing-accent)]">
-                                {{ $video['platform'] }}
-                            </span>
-                        </div>
-                        <div class="p-3.5 text-sm font-semibold">{{ $video['title'] }}</div>
-                    </div>
-                @endforeach
             </div>
         </div>
     </section>
@@ -480,9 +452,37 @@
         {{-- pb-24 clears the fixed mobile bottom tab bar below; md+ drops it since that bar is phone-only. --}}
         <div class="mx-auto max-w-lg space-y-7 py-8 pb-24 sm:max-w-2xl md:pb-10 lg:max-w-4xl">
 
-            {{-- 1. Quick Navigation Action Grid (Mobile-first, TT 2.A) --}}
+            {{-- 1. Quick Navigation Action Grid (Moto savdosi va e'lonlarga asosiy urg'u) --}}
             <section class="px-4">
                 <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                    <a
+                        href="{{ route('market.index') }}"
+                        class="glass-panel group flex flex-col justify-between rounded-2xl p-3.5 border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-transparent transition hover:-translate-y-0.5 hover:border-amber-400"
+                    >
+                        <div class="flex items-center justify-between">
+                            <span class="text-2xl">🛒</span>
+                            <span class="rounded bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-extrabold text-amber-400">Bozor</span>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-xs font-bold text-white group-hover:text-amber-400 transition">Moto Bozor</div>
+                            <div class="text-[10px] text-white/50">Sotuvdagi e'lonlar</div>
+                        </div>
+                    </a>
+
+                    <a
+                        href="{{ auth()->check() ? route('market.create') : route('register') }}"
+                        class="glass-panel group flex flex-col justify-between rounded-2xl p-3.5 border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-transparent transition hover:-translate-y-0.5 hover:border-emerald-400"
+                    >
+                        <div class="flex items-center justify-between">
+                            <span class="text-2xl">➕</span>
+                            <span class="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[9px] font-extrabold text-emerald-400">Bepul</span>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-xs font-bold text-white group-hover:text-emerald-400 transition">E'lon berish</div>
+                            <div class="text-[10px] text-white/50">Motongizni soting</div>
+                        </div>
+                    </a>
+
                     <a
                         href="{{ route('motorcycle.index') }}"
                         class="glass-panel group flex flex-col justify-between rounded-2xl p-3.5 transition hover:-translate-y-0.5 hover:border-amber-500/40"
@@ -493,7 +493,7 @@
                         </div>
                         <div class="mt-3">
                             <div class="text-xs font-bold text-white">Moto Katalog</div>
-                            <div class="text-[10px] text-white/50">Barcha modellar va filtrlar</div>
+                            <div class="text-[10px] text-white/50">Barcha modellar va narxlar</div>
                         </div>
                     </a>
 
@@ -507,38 +507,82 @@
                         </div>
                         <div class="mt-3">
                             <div class="text-xs font-bold text-white">Taqqoslagich</div>
-                            <div class="text-[10px] text-white/50">Parametrlarni solishtirish</div>
-                        </div>
-                    </a>
-
-                    <a
-                        href="{{ route('quiz.index') }}"
-                        class="glass-panel group flex flex-col justify-between rounded-2xl p-3.5 transition hover:-translate-y-0.5 hover:border-amber-500/40 border-amber-500/20"
-                    >
-                        <div class="flex items-center justify-between">
-                            <span class="text-2xl">🏆</span>
-                            <span class="rounded bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-extrabold text-amber-400">Haftalik</span>
-                        </div>
-                        <div class="mt-3">
-                            <div class="text-xs font-bold text-white">Motrix Quiz</div>
-                            <div class="text-[10px] text-white/50">Bilimingizni sinang</div>
-                        </div>
-                    </a>
-
-                    <a
-                        href="{{ route('news.index') }}"
-                        class="glass-panel group flex flex-col justify-between rounded-2xl p-3.5 transition hover:-translate-y-0.5 hover:border-amber-500/40"
-                    >
-                        <div class="flex items-center justify-between">
-                            <span class="text-2xl">📚</span>
-                            <span class="text-[10px] font-bold text-[var(--landing-accent)] opacity-0 group-hover:opacity-100 transition">Ochish →</span>
-                        </div>
-                        <div class="mt-3">
-                            <div class="text-xs font-bold text-white">Bilimlar bazasi</div>
-                            <div class="text-[10px] text-white/50">Qo'llanmalar va moylar</div>
+                            <div class="text-[10px] text-white/50">Parametrlarni solishtiring</div>
                         </div>
                     </a>
                 </div>
+            </section>
+
+            {{-- 2. SOTUVDAGI E'LONLAR & E'LON BERISH (Asosiy urg'u — eng yuqori o'rinda) --}}
+            <section class="px-4">
+                <div class="mb-3 flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--landing-accent)]">Bozor</p>
+                        <h2 class="text-base font-bold text-white">Sotuvdagi mototsikllar</h2>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ auth()->check() ? route('market.create') : route('register') }}" class="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2.5 py-1 text-xs font-bold text-amber-400 hover:bg-amber-500/30 transition">
+                            <span>+ E'lon berish</span>
+                        </a>
+                        <a href="{{ route('market.index') }}" class="text-xs font-medium text-[var(--landing-accent)] hover:underline">Barchasi →</a>
+                    </div>
+                </div>
+
+                @if($listings->isNotEmpty())
+                    <div class="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
+                        @foreach($listings as $listing)
+                            <a href="{{ route('market.show', $listing) }}" class="w-44 shrink-0 overflow-hidden rounded-2xl glass-panel group transition hover:border-amber-500/40">
+                                <div class="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br from-white/10 to-white/[0.02]">
+                                    @if($listing->hasMedia('images'))
+                                        <img src="{{ $listing->getFirstMediaUrl('images') }}" alt="{{ $listing->motorcycle->name ?? $listing->custom_title }}" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy">
+                                    @else
+                                        <div class="text-2xl font-black text-white/20">
+                                            {{ mb_substr($listing->motorcycle->brand->name ?? 'M', 0, 1) }}
+                                        </div>
+                                    @endif
+                                    <span class="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[9px] font-semibold text-white/90 backdrop-blur-sm">
+                                        {{ $listing->year }}
+                                    </span>
+                                </div>
+                                <div class="p-2.5">
+                                    <div class="truncate text-xs font-semibold text-white">{{ $listing->motorcycle->name ?? $listing->custom_title }}</div>
+                                    <div class="text-[11px] text-white/40">{{ $listing->city->name ?? '' }}</div>
+                                    <div class="mt-1 text-sm font-bold text-[var(--landing-accent)]">
+                                        {{ $listing->currency === 'USD' ? '$' : '' }}{{ number_format($listing->price) }}{{ $listing->currency === 'UZS' ? ' so\'m' : '' }}
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
+
+                        {{-- "+ E'loningizni joylang" kartochkasi --}}
+                        <a href="{{ auth()->check() ? route('market.create') : route('register') }}" class="w-36 shrink-0 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-white/20 p-4 text-center transition hover:border-amber-400 hover:bg-amber-500/5 group">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/20 text-amber-400 group-hover:scale-110 transition">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                            </div>
+                            <div class="mt-2 text-xs font-bold text-white">O'z motongizni soting</div>
+                            <div class="mt-0.5 text-[10px] text-white/50">Bepul e'lon berish →</div>
+                        </a>
+                    </div>
+                @else
+                    {{-- Hozircha e'lonlar kam bo'lsa: Foydalanuvchini e'lon berishga undovchi jozibali banner --}}
+                    <div class="glass-panel relative overflow-hidden rounded-3xl border border-amber-500/30 p-5 sm:p-6 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="max-w-md">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xl">📢</span>
+                                    <h3 class="text-sm font-extrabold text-white sm:text-base">Mototsiklingizni sotmoqchimisiz?</h3>
+                                </div>
+                                <p class="mt-1.5 text-xs text-white/70 leading-relaxed">
+                                    Motrix'da birinchilardan bo'lib bepul e'lon joylashtiring! AI rasm orqali barcha ma'lumotlarni avtomatik to'ldirib beradi va e'loningiz Telegram/Instagram sahifalarimizga ham yetkaziladi.
+                                </p>
+                            </div>
+                            <a href="{{ auth()->check() ? route('market.create') : route('register') }}" class="shrink-0 inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-2.5 text-xs font-bold text-zinc-950 shadow-lg shadow-amber-500/20 transition hover:scale-105">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                <span>+ Bepul e'lon joylashtirish</span>
+                            </a>
+                        </div>
+                    </div>
+                @endif
             </section>
 
             {{-- 2. Popular Brands Shortcut (TT 2.A & 2.B) --}}
@@ -726,39 +770,7 @@
                 </section>
             @endif
 
-            {{-- 9. Market listings --}}
-            @if($listings->isNotEmpty())
-                <section>
-                    <div class="mb-3 flex items-center justify-between px-4">
-                        <h2 class="text-base font-bold text-white">Sotuvdagi e'lonlar</h2>
-                        <a href="{{ route('market.index') }}" class="text-xs font-medium text-[var(--landing-accent)] hover:underline">Bozorga o'tish →</a>
-                    </div>
-                    <div class="flex gap-3 overflow-x-auto px-4 pb-1 scrollbar-none">
-                        @foreach($listings as $listing)
-                            <a href="{{ route('market.show', $listing) }}" class="w-44 shrink-0 overflow-hidden rounded-2xl glass-panel group">
-                                <div class="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br from-white/10 to-white/[0.02]">
-                                    @if($listing->hasMedia('images'))
-                                        <img src="{{ $listing->getFirstMediaUrl('images') }}" alt="{{ $listing->motorcycle->name ?? $listing->custom_title }}" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
-                                    @else
-                                        <div class="text-2xl font-black text-white/20">
-                                            {{ mb_substr($listing->motorcycle->brand->name ?? 'M', 0, 1) }}
-                                        </div>
-                                    @endif
-                                </div>
-                                <div class="p-2.5">
-                                    <div class="truncate text-xs font-semibold text-white">{{ $listing->motorcycle->name ?? $listing->custom_title }}</div>
-                                    <div class="text-[11px] text-white/40">{{ $listing->city->name ?? '' }}</div>
-                                    <div class="mt-1 text-sm font-bold text-[var(--landing-accent)]">
-                                        {{ $listing->currency === 'USD' ? '$' : '' }}{{ number_format($listing->price) }}{{ $listing->currency === 'UZS' ? ' so\'m' : '' }}
-                                    </div>
-                                </div>
-                            </a>
-                        @endforeach
-                    </div>
-                </section>
-            @endif
-
-            {{-- 10. AI assistant CTA --}}
+            {{-- AI assistant CTA --}}
             <section class="px-4">
                 <a href="{{ route('aiassistant.index') }}" class="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-[var(--landing-accent-2)] to-[var(--landing-accent)] p-4 text-[#04121a] shadow-lg transition hover:scale-[1.01]">
                     <span class="text-2xl">🤖</span>

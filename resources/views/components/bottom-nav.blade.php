@@ -1,21 +1,22 @@
 @php
     $items = [
         ['label' => 'Bosh sahifa', 'route' => 'home', 'icon' => 'home'],
+        ['label' => 'Bozor', 'route' => 'market.index', 'icon' => 'market'],
+        ['label' => 'E\'lon', 'route' => auth()->check() ? 'market.create' : 'register', 'icon' => 'plus', 'highlight' => true],
         ['label' => 'Katalog', 'route' => 'motorcycle.index', 'icon' => 'moto'],
         ['label' => 'Bo\'limlar', 'icon' => 'menu', 'group' => true],
-        ['label' => 'Video', 'route' => 'video.index', 'icon' => 'video'],
-        ['label' => 'Profil', 'route' => auth()->check() ? 'profile.edit' : 'login', 'icon' => 'user'],
     ];
 
     $marketGroupItems = [
-        ['label' => '⚖️ Modellarni taqqoslash', 'desc' => 'Texnik parametrlarni solishtiring', 'route' => 'comparison.index'],
+        ['label' => '⚖️ Taqqoslash', 'desc' => 'Texnik parametrlarni solishtiring', 'route' => 'comparison.index'],
         ['label' => '🏆 Motrix Quiz', 'desc' => 'Haftalik viktorina va reyting', 'route' => 'quiz.index'],
         ['label' => '📚 Bilimlar bazasi', 'desc' => 'Qo\'llanmalar, moylar va maslahatlar', 'route' => 'news.index'],
-        ['label' => '🛒 Mototsikl bozori', 'desc' => 'Sotiladigan mototsikllar', 'route' => 'market.index'],
+        ['label' => '🎥 Videolar', 'desc' => 'Sharhlar va yangi modellar', 'route' => 'video.index'],
         ['label' => '🔧 Ehtiyot qismlar', 'desc' => 'Ehtiyot qismlar va aksessuarlar', 'route' => 'parts.index'],
         ['label' => '🛠️ Ustaxonalar', 'desc' => 'Servis markazlari va ta\'mirlash', 'route' => 'servicecenter.index'],
+        ['label' => '👤 Profil', 'desc' => auth()->check() ? 'Mening profilim va sozlamalar' : 'Tizimga kirish', 'route' => auth()->check() ? 'profile.edit' : 'login'],
     ];
-    $marketGroupActive = request()->routeIs(['market.*', 'parts.*', 'servicecenter.*', 'comparison.*', 'quiz.*', 'news.*']);
+    $marketGroupActive = request()->routeIs(['parts.*', 'servicecenter.*', 'comparison.*', 'quiz.*', 'news.*', 'video.*', 'profile.*']);
 @endphp
 
 <nav
@@ -65,7 +66,17 @@
 
     <div class="flex">
         @foreach($items as $item)
-            @if(!empty($item['group']))
+            @if(!empty($item['highlight']))
+                <a
+                    href="{{ Route::has($item['route']) ? route($item['route']) : '#' }}"
+                    class="relative -top-3.5 flex flex-1 flex-col items-center justify-center group"
+                >
+                    <span class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 to-amber-400 text-zinc-950 shadow-lg shadow-amber-500/35 transition-transform group-hover:scale-105 active:scale-95 ring-4 ring-white dark:ring-zinc-950">
+                        <svg class="h-6 w-6 text-zinc-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    </span>
+                    <span class="mt-0.5 text-[10px] font-bold text-amber-500 dark:text-amber-400">{{ $item['label'] }}</span>
+                </a>
+            @elseif(!empty($item['group']))
                 <button
                     type="button"
                     @click="marketOpen = !marketOpen"
@@ -92,6 +103,9 @@
                         @switch($item['icon'])
                             @case('home')
                                 <svg class="h-6 w-6" fill="{{ $active ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4a1 1 0 001-1v-4h2v4a1 1 0 001 1h4a1 1 0 001-1V10" /></svg>
+                                @break
+                            @case('market')
+                                <svg class="h-6 w-6" fill="{{ $active ? 'currentColor' : 'none' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                                 @break
                             @case('moto')
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="5.5" cy="17.5" r="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18.5" cy="17.5" r="2.5" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M5.5 17.5h6l3-7h4M11.5 10.5l2-3h3M9 17.5h5" /></svg>

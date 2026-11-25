@@ -72,7 +72,7 @@ class HomeController extends Controller
             ->with(['motorcycle.brand', 'city', 'media'])
             ->where('status', 'active')
             ->latest('published_at')
-            ->limit(6)
+            ->limit(8)
             ->get();
 
         return view('home', compact(
