@@ -96,11 +96,17 @@
                     </svg>
                     <span>{{ number_format($article->views_count ?? 1, 0, '', ' ') }} marta o'qildi</span>
                 </span>
+                @if($article->video)
+                    <span>•</span>
+                    <a href="#video-guide" class="inline-flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400 hover:text-amber-500">
+                        <span>📹 Video qo'llanma</span>
+                    </a>
+                @endif
             </div>
         </div>
 
         {{-- Article Body (Readable Typography) --}}
-        <article class="prose prose-zinc dark:prose-invert max-w-none text-base leading-relaxed space-y-4">
+        <article class="article-content max-w-none text-base leading-relaxed space-y-4 text-zinc-800 dark:text-zinc-200">
             @if(Str::contains($article->body, ['<p>', '<div>', '<h3>', '<h2>', '<img', '<table>']))
                 {!! $article->body !!}
             @else
@@ -110,7 +116,7 @@
 
         {{-- Connected Video Section --}}
         @if($article->video)
-            <div class="rounded-3xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent p-5 dark:border-amber-500/30">
+            <div id="video-guide" class="scroll-mt-6 rounded-3xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent p-5 dark:border-amber-500/30">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
                     <div class="flex items-center gap-2">
                         <span class="text-2xl">📹</span>
@@ -330,4 +336,117 @@
         </div>
 
     </div>
+
+    <style>
+        .article-content h1, .article-content h2, .article-content h3, .article-content h4 {
+            color: #18181b;
+            font-weight: 800;
+            line-height: 1.3;
+        }
+        .dark .article-content h1, .dark .article-content h2, .dark .article-content h3, .dark .article-content h4 {
+            color: #f4f4f5;
+        }
+        .article-content h2 {
+            font-size: 1.35rem;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+        }
+        .article-content h3 {
+            font-size: 1.15rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .article-content p {
+            margin-bottom: 1.15rem;
+            line-height: 1.8;
+        }
+        .article-content ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin: 1rem 0;
+        }
+        .article-content ol {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+            margin: 1rem 0;
+        }
+        .article-content li {
+            margin-bottom: 0.4rem;
+            line-height: 1.6;
+        }
+        .article-content blockquote {
+            border-left: 4px solid #f59e0b;
+            background-color: rgba(245, 158, 11, 0.08);
+            padding: 1rem 1.25rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+            font-style: normal;
+        }
+        .article-content img {
+            border-radius: 1rem;
+            border: 1px solid rgba(228, 228, 231, 0.8);
+            margin: 1.25rem auto;
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .dark .article-content img {
+            border-color: rgba(39, 39, 42, 0.8);
+        }
+        .article-content figure {
+            margin: 1.5rem 0;
+        }
+        .article-content figcaption {
+            font-size: 0.75rem;
+            text-align: center;
+            color: #71717a;
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+        .dark .article-content figcaption {
+            color: #a1a1aa;
+        }
+        .article-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            border: 1px solid #e4e4e7;
+        }
+        .dark .article-content table {
+            border-color: #27272a;
+        }
+        .article-content th {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #b45309;
+            padding: 0.75rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid #e4e4e7;
+            text-align: left;
+        }
+        .dark .article-content th {
+            color: #fbbf24;
+            border-bottom-color: #27272a;
+        }
+        .article-content td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #f4f4f5;
+            font-size: 0.875rem;
+        }
+        .dark .article-content td {
+            border-bottom-color: #27272a;
+        }
+        .article-content a {
+            color: #d97706;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .article-content a:hover {
+            color: #b45309;
+        }
+    </style>
 </x-layout>

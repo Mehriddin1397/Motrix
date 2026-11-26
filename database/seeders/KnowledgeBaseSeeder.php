@@ -24,5 +24,6 @@ class KnowledgeBaseSeeder extends Seeder
         }
 
         $this->call(BatteryArticleSeeder::class);
+        $this->call(FirstMotorcycleArticleSeeder::class);
     }
 }
