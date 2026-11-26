@@ -70,17 +70,19 @@ class VideoPostResource extends Resource
                     ])->columns(2),
 
                 Forms\Components\Section::make('Nashr vaqti va Rejalashtirish')
-                    ->description('Videoni hozir darhol yuklash yoki kelajakdagi aniq sana va vaqtga rejalashtirish:')
+                    ->description('Videoni hozir darhol yuklash yoki kelajakdagi aniq sana va vaqtga rejalashtirish (O\'zbekiston vaqti bilan, UTC+5):')
                     ->schema([
                         Forms\Components\DateTimePicker::make('scheduled_at')
-                            ->label('Rejalashtirilgan nashr vaqti (ixtiyoriy)')
+                            ->label('Rejalashtirilgan nashr vaqti (Toshkent vaqti, UTC+5)')
                             ->placeholder('Hozir darhol yuklash uchun bo\'sh qoldiring')
                             ->helperText('Agar kelajakdagi sana va vaqtni tanlasangiz, tizim o\'sha vaqt yetganda videoni avtomatik tarzda barcha tanlangan tarmoqlarga joylaydi.')
                             ->seconds(false)
+                            ->timezone('Asia/Tashkent')
                             ->native(false),
 
                         Forms\Components\DateTimePicker::make('published_at')
                             ->label('Dastlabki yaratilgan sana')
+                            ->timezone('Asia/Tashkent')
                             ->disabled()
                             ->visible(fn (?VideoPost $record) => $record !== null),
                     ])->columns(2),
@@ -142,6 +144,7 @@ class VideoPostResource extends Resource
 
                 Tables\Columns\TextColumn::make('scheduled_at')
                     ->label('Rejalashtirilgan vaqt')
+                    ->timezone('Asia/Tashkent')
                     ->dateTime('d.m.Y H:i')
                     ->placeholder('Darhol')
                     ->sortable()
@@ -210,6 +213,7 @@ class VideoPostResource extends Resource
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Yaratilgan sana')
+                    ->timezone('Asia/Tashkent')
                     ->dateTime('d.m.Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
