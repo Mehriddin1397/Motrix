@@ -5,6 +5,7 @@ namespace App\Services\Social;
 use App\Models\VideoPost;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 class FacebookPublisherService
@@ -53,14 +54,29 @@ class FacebookPublisherService
             throw new RuntimeException("Video faylini ochib bo'lmadi.");
         }
 
+        $thumbStream = null;
+        if ($post->thumbnail_path && Storage::disk('public')->exists($post->thumbnail_path)) {
+            $thumbFullPath = Storage::disk('public')->path($post->thumbnail_path);
+            $thumbStream = fopen($thumbFullPath, 'r');
+        }
+
         try {
-            $response = Http::timeout(600)
-                ->attach('source', $fileStream, basename($videoFullPath))
-                ->post($url, [
-                    'access_token' => $this->accessToken,
-                    'title' => $post->title,
-                    'description' => $caption,
-                ]);
+            $request = Http::timeout(600)
+                ->attach('source', $fileStream, basename($videoFullPath));
+
+            if ($thumbStream) {
+                $request->attach('thumb', $thumbStream, basename($thumbFullPath));
+            }
+
+            $response = $request->post($url, [
+                'access_token' => $this->accessToken,
+                'title' => $post->title,
+                'description' => $caption,
+            ]);
+
+            if (is_resource($thumbStream)) {
+                fclose($thumbStream);
+            }
 
             if (is_resource($fileStream)) {
                 fclose($fileStream);
@@ -80,6 +96,9 @@ class FacebookPublisherService
                 'response' => $response->json(),
             ];
         } catch (\Throwable $e) {
+            if (is_resource($thumbStream)) {
+                fclose($thumbStream);
+            }
             if (is_resource($fileStream)) {
                 fclose($fileStream);
             }

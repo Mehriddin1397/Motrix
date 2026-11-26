@@ -5,6 +5,7 @@ namespace App\Services\Social;
 use App\Models\VideoPost;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 class YouTubePublisherService
@@ -85,6 +86,11 @@ class YouTubePublisherService
 
             $videoId = $response->json('id');
 
+            // 3-qadam: Agar muqova rasmi (thumbnail) mavjud bo'lsa, YouTube video muqovasiga o'rnatish
+            if ($videoId && $post->thumbnail_path && Storage::disk('public')->exists($post->thumbnail_path)) {
+                $this->setThumbnail((string) $videoId, Storage::disk('public')->path($post->thumbnail_path), $accessToken);
+            }
+
             return [
                 'success' => true,
                 'video_id' => (string) $videoId,
@@ -96,6 +102,36 @@ class YouTubePublisherService
                 fclose($fileStream);
             }
             throw $e;
+        }
+    }
+
+    /**
+     * Upload custom thumbnail image for the YouTube video.
+     */
+    protected function setThumbnail(string $videoId, string $thumbnailFullPath, string $accessToken): void
+    {
+        try {
+            $mimeType = function_exists('mime_content_type') ? (mime_content_type($thumbnailFullPath) ?: 'image/jpeg') : 'image/jpeg';
+            $imageContent = file_get_contents($thumbnailFullPath);
+
+            if ($imageContent === false) {
+                return;
+            }
+
+            $url = "https://www.googleapis.com/upload/youtube/v3/thumbnails/set?videoId={$videoId}";
+
+            $response = Http::withToken($accessToken)
+                ->timeout(60)
+                ->withBody($imageContent, $mimeType)
+                ->post($url);
+
+            if (! $response->successful()) {
+                Log::warning("YouTube thumbnail o'rnatishda javob: " . ($response->json('error.message') ?? $response->body()));
+            } else {
+                Log::info("YouTube video ({$videoId}) uchun muqova rasmi muvaffaqiyatli yuklandi.");
+            }
+        } catch (\Throwable $e) {
+            Log::warning("YouTube thumbnail yuklashda ogohlantirish: " . $e->getMessage());
         }
     }
 

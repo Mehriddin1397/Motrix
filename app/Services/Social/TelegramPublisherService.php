@@ -5,6 +5,7 @@ namespace App\Services\Social;
 use App\Models\VideoPost;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 class TelegramPublisherService
@@ -89,15 +90,30 @@ class TelegramPublisherService
             throw new RuntimeException("Video faylini o'qib bo'lmadi.");
         }
 
+        $thumbStream = null;
+        if ($post->thumbnail_path && Storage::disk('public')->exists($post->thumbnail_path)) {
+            $thumbFullPath = Storage::disk('public')->path($post->thumbnail_path);
+            $thumbStream = fopen($thumbFullPath, 'r');
+        }
+
         try {
-            $response = Http::timeout(300)
-                ->attach('video', $fileStream, basename($targetVideoPath))
-                ->post($url, [
-                    'chat_id' => $this->chatId,
-                    'caption' => $caption,
-                    'parse_mode' => 'HTML',
-                    'supports_streaming' => true,
-                ]);
+            $request = Http::timeout(300)
+                ->attach('video', $fileStream, basename($targetVideoPath));
+
+            if ($thumbStream) {
+                $request->attach('thumbnail', $thumbStream, basename($thumbFullPath));
+            }
+
+            $response = $request->post($url, [
+                'chat_id' => $this->chatId,
+                'caption' => $caption,
+                'parse_mode' => 'HTML',
+                'supports_streaming' => true,
+            ]);
+
+            if (is_resource($thumbStream)) {
+                fclose($thumbStream);
+            }
 
             if (is_resource($fileStream)) {
                 fclose($fileStream);
@@ -136,11 +152,17 @@ class TelegramPublisherService
                 'response' => $result,
             ];
         } catch (\Throwable $e) {
+            if (is_resource($thumbStream)) {
+                fclose($thumbStream);
+            }
             if (is_resource($fileStream)) {
                 fclose($fileStream);
             }
             throw $e;
         } finally {
+            if (is_resource($thumbStream)) {
+                fclose($thumbStream);
+            }
             if ($tempCompressedFile && file_exists($tempCompressedFile)) {
                 @unlink($tempCompressedFile);
             }

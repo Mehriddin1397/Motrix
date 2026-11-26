@@ -34,6 +34,7 @@ class VideoPost extends Model
         'instagram_media_id',
         'error_log',
         'published_at',
+        'scheduled_at',
     ];
 
     protected function casts(): array
@@ -44,6 +45,7 @@ class VideoPost extends Model
             'send_to_facebook' => 'boolean',
             'send_to_instagram' => 'boolean',
             'published_at' => 'datetime',
+            'scheduled_at' => 'datetime',
             'views_count' => 'integer',
         ];
     }
@@ -77,5 +79,15 @@ class VideoPost extends Model
     public function getPublicUrlAttribute(): string
     {
         return 'https://motrix.uz/video-posts/' . $this->slug;
+    }
+
+    public function isScheduled(): bool
+    {
+        return $this->scheduled_at !== null && $this->scheduled_at->isFuture();
+    }
+
+    public function isReadyToPublish(): bool
+    {
+        return $this->scheduled_at === null || $this->scheduled_at->isPast();
     }
 }

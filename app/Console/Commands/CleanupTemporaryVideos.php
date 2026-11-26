@@ -33,6 +33,18 @@ class CleanupTemporaryVideos extends Command
 
         $posts = VideoPost::whereNotNull('video_path')
             ->where('created_at', '<=', $threshold)
+            ->where(function ($q) {
+                // Rejalashtirilmagan yoki rejalashtirilgan vaqti o'tib bo'lganlar
+                $q->whereNull('scheduled_at')
+                  ->orWhere('scheduled_at', '<=', now());
+            })
+            ->where(function ($q) {
+                // Hali yuborilishi kutilayotgan rejalashtirilgan videolarni o'chirmaymiz
+                $q->where('telegram_status', '!=', 'scheduled')
+                  ->where('youtube_status', '!=', 'scheduled')
+                  ->where('facebook_status', '!=', 'scheduled')
+                  ->where('instagram_status', '!=', 'scheduled');
+            })
             ->get();
 
         $deletedCount = 0;

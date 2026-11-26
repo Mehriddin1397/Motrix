@@ -25,10 +25,12 @@ class PublishVideoToSocialMediaJob implements ShouldQueue
     public int $tries = 1;
 
     public int $videoPostId;
+    public bool $forcePublish;
 
-    public function __construct(int|VideoPost $post)
+    public function __construct(int|VideoPost $post, bool $forcePublish = false)
     {
         $this->videoPostId = $post instanceof VideoPost ? $post->id : $post;
+        $this->forcePublish = $forcePublish;
     }
 
     public function handle(
@@ -44,6 +46,12 @@ class PublishVideoToSocialMediaJob implements ShouldQueue
             return;
         }
 
+        // Agar video kelajakdagi vaqtga rejalashtirilgan bo'lsa va majburiy yuborish bo'lmasa, kutamiz
+        if (! $this->forcePublish && $post->isScheduled()) {
+            Log::info("PublishVideoToSocialMediaJob: VideoPost {$this->videoPostId} hali rejalashtirilgan vaqtga yetmadi ({$post->scheduled_at}). Qoldirildi.");
+            return;
+        }
+
         if (! $post->video_path || ! Storage::disk('public')->exists($post->video_path)) {
             Log::warning("PublishVideoToSocialMediaJob: VideoPost {$this->videoPostId} uchun video fayl topilmadi.");
             return;
@@ -51,6 +59,10 @@ class PublishVideoToSocialMediaJob implements ShouldQueue
 
         $videoFullPath = Storage::disk('public')->path($post->video_path);
         $errors = [];
+
+        if ($post->scheduled_at && ($post->published_at === null || $post->published_at < $post->scheduled_at)) {
+            $post->update(['published_at' => now()]);
+        }
 
         // 1. YouTube (Birinchi navbatda: muvaffaqiyatli bo'lsa, YouTube linki boshqa tarmoqlarga ham uzatiladi)
         if ($post->send_to_youtube && $post->youtube_status !== 'success') {

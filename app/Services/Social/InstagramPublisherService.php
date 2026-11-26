@@ -56,12 +56,29 @@ class InstagramPublisherService
 
         // 1-qadam: Reels Media Container yaratish
         $createUrl = "https://graph.facebook.com/v21.0/{$this->instagramAccountId}/media";
-        $createResponse = Http::timeout(60)->post($createUrl, [
+        $payload = [
             'media_type' => 'REELS',
             'video_url' => $videoUrl,
             'caption' => $caption,
             'access_token' => $this->accessToken,
-        ]);
+        ];
+
+        // Agar muqova rasmi (thumbnail) mavjud bo'lsa, Instagram Reels cover rasmi qilib belgilash
+        if ($post->thumbnail_url) {
+            $thumbUrl = $post->thumbnail_url;
+            if (! str_starts_with($thumbUrl, 'http')) {
+                $thumbUrl = rtrim(config('app.canonical_url') ?: config('app.url') ?: 'https://motrix.uz', '/') . '/' . ltrim($thumbUrl, '/');
+            } elseif (str_contains($thumbUrl, '192.168.') || str_contains($thumbUrl, '127.0.0.1') || str_contains($thumbUrl, 'localhost')) {
+                $parsed = parse_url($thumbUrl);
+                $thumbUrl = 'https://motrix.uz' . ($parsed['path'] ?? '');
+            }
+
+            if (filter_var($thumbUrl, FILTER_VALIDATE_URL)) {
+                $payload['cover_url'] = $thumbUrl;
+            }
+        }
+
+        $createResponse = Http::timeout(60)->post($createUrl, $payload);
 
         if (! $createResponse->successful()) {
             $error = $createResponse->json('error.message') ?? $createResponse->body();

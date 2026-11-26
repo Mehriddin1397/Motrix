@@ -60,14 +60,33 @@ class VideoPostResource extends Resource
                             ->columnSpanFull(),
 
                         Forms\Components\FileUpload::make('thumbnail_path')
-                            ->label('Muqova rasmi (Thumbnail, ixtiyoriy)')
+                            ->label('Video yuzi / Muqova rasmi (Thumbnail)')
                             ->image()
+                            ->imageEditor()
                             ->disk('public')
-                            ->directory('videos/thumbnails'),
+                            ->directory('videos/thumbnails')
+                            ->helperText('Ushbu rasm Telegram, YouTube, Instagram Reels va Facebook tarmoqlarida video muqovasi (birinchi ko\'rinadigan yuz rasmi) sifatida o\'rnatiladi.')
+                            ->columnSpanFull(),
+                    ])->columns(2),
+
+                Forms\Components\Section::make('Nashr vaqti va Rejalashtirish')
+                    ->description('Videoni hozir darhol yuklash yoki kelajakdagi aniq sana va vaqtga rejalashtirish:')
+                    ->schema([
+                        Forms\Components\DateTimePicker::make('scheduled_at')
+                            ->label('Rejalashtirilgan nashr vaqti (ixtiyoriy)')
+                            ->placeholder('Hozir darhol yuklash uchun bo\'sh qoldiring')
+                            ->helperText('Agar kelajakdagi sana va vaqtni tanlasangiz, tizim o\'sha vaqt yetganda videoni avtomatik tarzda barcha tanlangan tarmoqlarga joylaydi.')
+                            ->seconds(false)
+                            ->native(false),
+
+                        Forms\Components\DateTimePicker::make('published_at')
+                            ->label('Dastlabki yaratilgan sana')
+                            ->disabled()
+                            ->visible(fn (?VideoPost $record) => $record !== null),
                     ])->columns(2),
 
                 Forms\Components\Section::make('Ijtimoiy tarmoqlarga tarqatish')
-                    ->description('Video yuklangach, orqa fonda quyidagi tanlangan platformalarga avtomatik joylanadi:')
+                    ->description('Video yuklangach yoki rejalashtirilgan vaqt yetganda, quyidagi tanlangan platformalarga avtomatik joylanadi:')
                     ->schema([
                         Forms\Components\Toggle::make('send_to_telegram')
                             ->label('Telegram (Kanal va Guruh)')
@@ -113,12 +132,21 @@ class VideoPostResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('thumbnail_path')
                     ->label('Muqova')
-                    ->disk('public'),
+                    ->disk('public')
+                    ->square(),
 
                 Tables\Columns\TextColumn::make('title')
                     ->label('Sarlavha')
                     ->searchable()
-                    ->limit(35),
+                    ->limit(30),
+
+                Tables\Columns\TextColumn::make('scheduled_at')
+                    ->label('Rejalashtirilgan vaqt')
+                    ->dateTime('d.m.Y H:i')
+                    ->placeholder('Darhol')
+                    ->sortable()
+                    ->badge()
+                    ->color(fn (?VideoPost $record): string => ($record && $record->isScheduled()) ? 'warning' : 'gray'),
 
                 Tables\Columns\TextColumn::make('telegram_status')
                     ->label('Telegram')
@@ -127,8 +155,17 @@ class VideoPostResource extends Resource
                         'success' => 'success',
                         'failed' => 'danger',
                         'processing' => 'warning',
+                        'scheduled' => 'info',
                         'skipped' => 'gray',
                         default => 'info',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'scheduled' => '⏰ Rejalashtirilgan',
+                        'processing' => '⏳ Yuklanmoqda',
+                        'success' => '✅ Yuklandi',
+                        'failed' => '❌ Xatolik',
+                        'skipped' => 'O\'tkazib yuborilgan',
+                        default => $state,
                     }),
 
                 Tables\Columns\TextColumn::make('youtube_status')
@@ -138,8 +175,17 @@ class VideoPostResource extends Resource
                         'success' => 'success',
                         'failed' => 'danger',
                         'processing' => 'warning',
+                        'scheduled' => 'info',
                         'skipped' => 'gray',
                         default => 'info',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'scheduled' => '⏰ Rejalashtirilgan',
+                        'processing' => '⏳ Yuklanmoqda',
+                        'success' => '✅ Yuklandi',
+                        'failed' => '❌ Xatolik',
+                        'skipped' => 'O\'tkazib yuborilgan',
+                        default => $state,
                     }),
 
                 Tables\Columns\TextColumn::make('instagram_status')
@@ -149,25 +195,76 @@ class VideoPostResource extends Resource
                         'success' => 'success',
                         'failed' => 'danger',
                         'processing' => 'warning',
+                        'scheduled' => 'info',
                         'skipped' => 'gray',
                         default => 'info',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'scheduled' => '⏰ Rejalashtirilgan',
+                        'processing' => '⏳ Yuklanmoqda',
+                        'success' => '✅ Yuklandi',
+                        'failed' => '❌ Xatolik',
+                        'skipped' => 'O\'tkazib yuborilgan',
+                        default => $state,
                     }),
 
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Sana')
+                    ->label('Yaratilgan sana')
                     ->dateTime('d.m.Y H:i')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                Tables\Filters\Filter::make('is_scheduled')
+                    ->label('⏰ Faqat rejalashtirilganlar')
+                    ->query(fn ($query) => $query->whereNotNull('scheduled_at')->where('scheduled_at', '>', now())),
+
+                Tables\Filters\SelectFilter::make('telegram_status')
+                    ->label('Telegram holati')
+                    ->options([
+                        'scheduled' => 'Rejalashtirilgan',
+                        'pending' => 'Kutilmoqda',
+                        'processing' => 'Yuklanmoqda',
+                        'success' => 'Yuklandi',
+                        'failed' => 'Xatolik',
+                    ]),
             ])
             ->actions([
+                Tables\Actions\Action::make('publishNow')
+                    ->label('Hozir yuborish')
+                    ->icon('heroicon-m-paper-airplane')
+                    ->color('success')
+                    ->visible(fn (VideoPost $record) => $record->isScheduled() || $record->telegram_status === 'scheduled')
+                    ->requiresConfirmation()
+                    ->modalHeading('Videoni hozir darhol yuborish')
+                    ->modalDescription('Rejalashtirilgan vaqtni kutmasdan, videoni hoziroq barcha tanlangan tarmoqlarga yuborishni xohlaysizmi?')
+                    ->action(function (VideoPost $record) {
+                        $record->update([
+                            'scheduled_at' => now(),
+                            'telegram_status' => $record->send_to_telegram && $record->telegram_status !== 'success' ? 'pending' : $record->telegram_status,
+                            'youtube_status' => $record->send_to_youtube && $record->youtube_status !== 'success' ? 'pending' : $record->youtube_status,
+                            'instagram_status' => $record->send_to_instagram && $record->instagram_status !== 'success' ? 'pending' : $record->instagram_status,
+                        ]);
+
+                        PublishVideoToSocialMediaJob::dispatch($record, true);
+
+                        Notification::make()
+                            ->title('Yuborish boshlandi!')
+                            ->body('Video tarmoqlarga darhol yuklanmoqda.')
+                            ->success()
+                            ->send();
+                    }),
+
                 Tables\Actions\Action::make('retryPublish')
                     ->label('Qayta yuborish')
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
+                    ->visible(fn (VideoPost $record) => ! $record->isScheduled() && ($record->telegram_status === 'failed' || $record->youtube_status === 'failed' || $record->instagram_status === 'failed'))
                     ->requiresConfirmation()
                     ->modalHeading('Tarmoqlarga qayta yuborish')
                     ->modalDescription('Ushbu videoni barcha kutilayotgan yoki xatolik bergan ijtimoiy tarmoqlarga qayta yuborishni xohlaysizmi?')
                     ->action(function (VideoPost $record) {
-                        PublishVideoToSocialMediaJob::dispatch($record);
+                        PublishVideoToSocialMediaJob::dispatch($record, true);
                         Notification::make()
                             ->title('Navbatga qo\'yildi!')
                             ->body('Video orqa fonda tarmoqlarga qayta yuklanmoqda.')

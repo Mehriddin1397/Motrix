@@ -10,6 +10,10 @@ class VideoPostController extends Controller
     public function index()
     {
         $posts = VideoPost::query()
+            ->where(function ($q) {
+                $q->whereNull('scheduled_at')
+                  ->orWhere('scheduled_at', '<=', now());
+            })
             ->latest()
             ->paginate(12);
 
@@ -18,10 +22,22 @@ class VideoPostController extends Controller
 
     public function show(string $slug)
     {
-        $post = VideoPost::where('slug', $slug)->firstOrFail();
+        $post = VideoPost::where('slug', $slug)
+            ->where(function ($q) {
+                if (auth()->check() && (auth()->user()->hasRole('administrator') || auth()->user()->hasRole('moderator'))) {
+                    return;
+                }
+                $q->whereNull('scheduled_at')
+                  ->orWhere('scheduled_at', '<=', now());
+            })
+            ->firstOrFail();
         $post->increment('views_count');
 
         $relatedPosts = VideoPost::where('id', '!=', $post->id)
+            ->where(function ($q) {
+                $q->whereNull('scheduled_at')
+                  ->orWhere('scheduled_at', '<=', now());
+            })
             ->latest()
             ->limit(4)
             ->get();
